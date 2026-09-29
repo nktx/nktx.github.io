@@ -15,25 +15,21 @@
 </style>
 </head>
 <body>
-<a class="skip" href="#workspace">跳到比對工具</a>
 <div class="shell">
-<header class="masthead"><span class="identity">Followers Compare</span><span class="local">Local browser tool</span></header>
+<header class="masthead"><span class="identity">Followers Compare</span></header>
 <main>
-<section class="opening" aria-labelledby="page-title"><h1 id="page-title">上傳最新的追蹤者紀錄。</h1><p>這個瀏覽器會記住上一次上傳的紀錄。每次放入新的 JSON，會自動與上次比較，再把這份存成下一次的比較基準。</p></section>
 <section class="workspace" id="workspace" aria-label="上傳追蹤者檔案">
 <div class="uploads">
-<div class="upload"><div class="upload-head"><h2>最新紀錄</h2><span class="sequence">Upload</span></div><label class="drop" id="drop"><span class="drop-copy"><strong>選擇 JSON 或拖放到這裡</strong><small>followers_1.json</small></span><input id="input" type="file" accept=".json,application/json" aria-label="選擇追蹤者 JSON" aria-describedby="error"></label><div class="file" id="file">尚未選擇檔案</div><div class="error" id="error" role="alert"></div></div>
-<div class="upload"><div class="upload-head"><h2>已儲存的紀錄</h2><span class="sequence">Saved</span></div><div class="saved none" id="saved"><span class="saved-date" id="saved-date">尚無紀錄</span><span class="saved-meta" id="saved-meta">第一次上傳後會存在這裡</span><button class="button" id="reset" type="button" hidden>刪除已儲存紀錄</button></div></div>
+<div class="upload"><div class="upload-head"><h2>最新紀錄</h2></div><label class="drop" id="drop"><span class="drop-copy"><strong>選擇 JSON 或拖放到這裡</strong></span><input id="input" type="file" accept=".json,application/json" aria-label="選擇追蹤者 JSON" aria-describedby="error"></label><div class="file" id="file">尚未選擇檔案</div><div class="error" id="error" role="alert"></div></div>
+<div class="upload"><div class="upload-head"><h2>已儲存的紀錄</h2></div><div class="saved none" id="saved"><span class="saved-date" id="saved-date">尚無紀錄</span><span class="saved-meta" id="saved-meta"></span><button class="button" id="reset" type="button" hidden>刪除已儲存紀錄</button></div></div>
 </div>
-<div class="action-row"><p class="status" id="status" role="status" aria-live="polite">讀取已儲存紀錄中…</p></div>
 </section>
 <section class="evidence" aria-labelledby="summary-title">
-<div class="summary-head"><h2 id="summary-title">追蹤者變化</h2><p>帳號依 username 比對，相同名稱不重複計算。</p></div>
+<div class="summary-head"><h2 id="summary-title">追蹤者變化</h2></div>
 <div class="stats"><div class="stat"><span class="stat-label" id="old-label">上次</span><strong class="stat-value" id="old-count">—</strong></div><div class="stat"><span class="stat-label" id="new-label">本次</span><strong class="stat-value" id="new-count">—</strong></div><div class="stat net"><span class="stat-label">淨變化 / Net change</span><strong class="stat-value" id="net-count">—</strong></div></div>
-<div class="results"><section class="result" aria-labelledby="added-title"><div class="result-head"><h3 id="added-title">新增帳號</h3><span class="count" id="added-count">—</span></div><div id="added-list" class="empty">等待上傳</div></section><section class="result" aria-labelledby="removed-title"><div class="result-head"><h3 id="removed-title">移除帳號</h3><span class="count" id="removed-count">—</span></div><div id="removed-list" class="empty">等待上傳</div></section></div>
+<div class="results"><section class="result" aria-labelledby="added-title"><div class="result-head"><h3 id="added-title">新增帳號</h3><span class="count" id="added-count">—</span></div><div id="added-list" class="empty">—</div></section><section class="result" aria-labelledby="removed-title"><div class="result-head"><h3 id="removed-title">移除帳號</h3><span class="count" id="removed-count">—</span></div><div id="removed-list" class="empty">—</div></section></div>
 </section>
 </main>
-<footer class="method"><p>所有內容只在這個瀏覽器中處理，不會上傳到任何伺服器。上一次的紀錄存在此瀏覽器的 IndexedDB；換裝置、換瀏覽器或清除網站資料後就會消失。支援 Instagram followers 陣列，或包含 <code>relationships_followers</code> 陣列的物件；每筆讀取 <code>string_list_data[0].value</code>。</p></footer>
 </div>
 <script>
 'use strict';
@@ -70,7 +66,7 @@ const clearSnapshot=()=>withStore('readwrite',store=>store.delete('latest'));
 function renderSaved(){
  $('saved').classList.toggle('none',!saved);$('reset').hidden=!saved;
  $('saved-date').textContent=saved?formatDate(saved.savedAt):'尚無紀錄';
- $('saved-meta').textContent=saved?`${formatNumber(saved.names.length)} 個帳號・${saved.fileName}`:'第一次上傳後會存在這裡';
+ $('saved-meta').textContent=saved?`${formatNumber(saved.names.length)} 個帳號・${saved.fileName}`:'';
 }
 function renderResult(before,after){
  $('old-label').textContent=before?`上次・${formatDate(before.savedAt)}`:'上次';
@@ -78,7 +74,7 @@ function renderResult(before,after){
  $('old-count').textContent=before?formatNumber(before.names.length):'—';
  $('new-count').textContent=after?formatNumber(after.names.length):'—';
  if(!before||!after){
-  const message=after?'這是第一份紀錄，下次上傳時會開始比對':'等待上傳';
+  const message='—';
   $('net-count').textContent=$('added-count').textContent=$('removed-count').textContent='—';
   renderList('added-list',null,message);renderList('removed-list',null,message);return null;
  }
@@ -109,10 +105,9 @@ async function load(files){
   await saveSnapshot(after);if(current!==version)return;
   if(!before&&navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
   saved=after;renderSaved();
-  $('status').textContent=result?`比對完成：新增 ${formatNumber(result.added.length)} 個，移除 ${formatNumber(result.removed.length)} 個帳號。本次紀錄已取代 ${formatDate(before.savedAt)} 的紀錄。`:`已儲存 ${formatDate(after.savedAt)} 的 ${formatNumber(after.names.length)} 個帳號，下次上傳時會自動比對。`;
  }catch{
   if(current!==version)return;
-  $('status').textContent=(result?`比對完成：新增 ${formatNumber(result.added.length)} 個，移除 ${formatNumber(result.removed.length)} 個帳號。`:'')+'但無法儲存這份紀錄（瀏覽器可能停用了網站儲存或正在使用無痕模式）。';
+  $('error').textContent='無法儲存這份紀錄。';
  }
 }
 const input=$('input'),drop=$('drop');
@@ -124,13 +119,12 @@ window.addEventListener('dragover',event=>event.preventDefault());
 window.addEventListener('drop',event=>event.preventDefault());
 $('reset').addEventListener('click',async()=>{
  if(!saved||!confirm(`確定刪除 ${formatDate(saved.savedAt)} 的已儲存紀錄？刪除後下一次上傳會重新開始。`))return;
- try{await clearSnapshot();version++;saved=null;renderSaved();renderResult(null,null);showFile('尚未選擇檔案');$('error').textContent='';$('status').textContent='已刪除儲存的紀錄。';}
- catch{$('status').textContent='刪除失敗，請重新整理後再試。';}
+ try{await clearSnapshot();version++;saved=null;renderSaved();renderResult(null,null);showFile('尚未選擇檔案');$('error').textContent='';}
+ catch{$('error').textContent='刪除失敗。';}
 });
 loadSnapshot().then(snapshot=>{
  saved=snapshot&&Array.isArray(snapshot.names)?snapshot:null;renderSaved();
- $('status').textContent=saved?`已找到 ${formatDate(saved.savedAt)} 的紀錄，上傳新的 JSON 即可比對。`:'尚無已儲存紀錄。上傳第一份 JSON 後會存起來作為比較基準。';
-}).catch(()=>{renderSaved();$('status').textContent='這個瀏覽器無法使用網站儲存，只能讀取檔案、無法記住上一次紀錄。';});
+}).catch(()=>{renderSaved();$('error').textContent='無法讀取已儲存紀錄。';});
 </script>
 </body>
 </html>

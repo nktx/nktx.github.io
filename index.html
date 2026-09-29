@@ -6,6 +6,9 @@
   <title>Kent Yang</title>
   <meta name="description" content="Kent Yang — Product Designer based in Tokyo.">
   <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;600&display=swap">
   <style>
     :root {
       --bg: #fefefe;
@@ -18,7 +21,7 @@
       }
     }
     html {
-      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif;
+      font-family: "IBM Plex Sans", sans-serif;
       font-weight: 300;
       color: var(--text);
       background: var(--bg);
@@ -34,6 +37,13 @@
       max-width: 300px;
       height: auto;
       margin-bottom: 1.45rem;
+      mix-blend-mode: multiply;
+    }
+    @media (prefers-color-scheme: dark) {
+      img {
+        filter: invert(1);
+        mix-blend-mode: screen;
+      }
     }
     p {
       line-height: 1.6em;
@@ -45,7 +55,7 @@
 </head>
 <body>
   <main>
-    <img src="profile.jpg" alt="Kent Yang" width="826" height="828">
+    <img src="profile.webp" alt="Kent Yang" width="2000" height="2000">
     <p class="name">Kent Yang</p>
     <p>Product Designer based in Tokyo.<br>I recognize design as a method, a process, and a journey to build relationships.</p>
   </main>

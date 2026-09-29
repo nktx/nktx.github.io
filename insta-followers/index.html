@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Instagram followers 比對工具</title>
+<style>
+:root{color-scheme:light dark;--bg:#fff;--surface:#fafafa;--ink:#111;--muted:#666;--faint:#8a8a8a;--line:#e5e5e5;--strong:#111;--focus:#0070f3;--error:#c52727;--radius:8px;--sans:"Geist","SF Pro Text","SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;--mono:"Geist Mono","SFMono-Regular",Consolas,monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5}button,input{font:inherit}.skip{position:fixed;left:16px;top:16px;z-index:10;transform:translateY(-150%);background:var(--ink);color:var(--bg);padding:8px 12px;border-radius:var(--radius)}.skip:focus{transform:none}.shell{width:min(1120px,calc(100% - 48px));margin:0 auto}.masthead{display:flex;align-items:baseline;justify-content:space-between;gap:24px;padding:28px 0 72px}.identity{font-weight:600;letter-spacing:-.02em}.local{color:var(--muted);font-size:14px}.opening{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:end;margin-bottom:48px}.opening h1{grid-column:span 7;margin:0;font-size:clamp(40px,6vw,72px);line-height:1.02;letter-spacing:-.055em;font-weight:600}.opening p{grid-column:9/span 4;margin:0;color:var(--muted);max-width:34ch}.workspace{border-top:1px solid var(--strong);border-bottom:1px solid var(--line)}.uploads{display:grid;grid-template-columns:1fr 1fr}.upload{min-width:0;padding:32px 32px 36px 0}.upload+.upload{border-left:1px solid var(--line);padding-left:32px;padding-right:0}.upload-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:20px}.upload h2{font-size:20px;line-height:1.2;letter-spacing:-.02em;margin:0;font-weight:550}.sequence{font-family:var(--mono);font-size:13px;color:var(--faint)}.drop{position:relative;display:flex;min-height:180px;align-items:center;justify-content:center;text-align:center;padding:28px;border:1px dashed #aaa;border-radius:var(--radius);cursor:pointer;background:var(--surface);transition:border-color .15s,background-color .15s}.drop:hover,.drop.drag{border-color:var(--strong);background:var(--bg)}.drop:focus-within{outline:2px solid var(--focus);outline-offset:3px}.drop input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}.drop-copy{display:grid;gap:6px}.drop strong{font-size:15px;font-weight:550}.drop small{font-size:14px;color:var(--muted)}.file{min-height:50px;margin-top:16px;font-family:var(--mono);font-size:13px;overflow-wrap:anywhere}.file .meta{display:block;margin-top:3px;font-family:var(--sans);color:var(--muted)}.error{min-height:0;margin-top:8px;color:var(--error);font-size:14px}.error:empty{display:none}.action-row{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:20px 0}.status{margin:0;color:var(--muted);font-size:14px}.button{border:1px solid var(--line);border-radius:var(--radius);background:var(--bg);color:var(--ink);padding:8px 14px;cursor:pointer;white-space:nowrap}.button:hover{border-color:var(--strong)}.button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}.evidence{padding:72px 0}.summary-head{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;margin-bottom:24px}.summary-head h2{grid-column:span 6;margin:0;font-size:28px;line-height:1.2;letter-spacing:-.035em;font-weight:550}.summary-head p{grid-column:9/span 4;margin:0;color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.stat{grid-column:span 3;padding:24px 24px 24px 0;min-width:0}.stat+.stat{border-left:1px solid var(--line);padding-left:24px}.stat.net{grid-column:span 6}.stat-label{display:block;color:var(--muted);font-size:14px}.stat-value{display:block;margin-top:10px;font-size:clamp(32px,5vw,56px);line-height:1;font-weight:500;letter-spacing:-.045em;font-variant-numeric:tabular-nums}.results{display:grid;grid-template-columns:1fr 1fr;margin-top:64px;border-top:1px solid var(--strong)}.result{min-width:0}.result+.result{border-left:1px solid var(--line)}.result-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:22px 24px 18px 0;border-bottom:1px solid var(--line)}.result+.result .result-head{padding-left:24px;padding-right:0}.result h3{font-size:20px;margin:0;font-weight:550;letter-spacing:-.02em}.count{font-variant-numeric:tabular-nums;color:var(--muted)}ul{list-style:none;margin:0;padding:0;max-height:440px;overflow:auto}li{padding:11px 24px 11px 0;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:14px;overflow-wrap:anywhere}.result+.result li{padding-left:24px}.empty{padding:40px 24px 40px 0;color:var(--muted);font-size:14px}.result+.result .empty{padding-left:24px}.method{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;border-top:1px solid var(--line);padding:28px 0 56px}.method p{grid-column:span 7;margin:0;color:var(--muted);font-size:14px}.method code{font-family:var(--mono);font-size:.92em;color:var(--ink)}[hidden]{display:none!important}
+@media(prefers-color-scheme:dark){:root{--bg:#0a0a0a;--surface:#111;--ink:#ededed;--muted:#a1a1a1;--faint:#777;--line:#2b2b2b;--strong:#ededed;--focus:#52a8ff;--error:#ff6961}.drop{border-color:#555}}
+@media(max-width:760px){.shell{width:min(100% - 32px,1120px)}.masthead{padding:22px 0 48px}.opening{display:block;margin-bottom:36px}.opening h1{font-size:clamp(38px,12vw,56px)}.opening p{margin-top:24px;max-width:38ch}.uploads{grid-template-columns:1fr}.upload{padding:24px 0 28px}.upload+.upload{border-left:0;border-top:1px solid var(--line);padding:28px 0}.drop{min-height:150px}.action-row{align-items:flex-start}.evidence{padding:52px 0}.summary-head{display:block}.summary-head p{margin-top:12px}.stats{grid-template-columns:1fr 1fr}.stat,.stat.net{grid-column:auto;padding:20px 16px 20px 0}.stat:nth-child(2){padding-right:0}.stat.net{grid-column:1/-1;border-left:0;border-top:1px solid var(--line);padding-left:0}.results{grid-template-columns:1fr;margin-top:48px}.result+.result{border-left:0;border-top:1px solid var(--strong)}.result+.result .result-head{padding-left:0}.result+.result li{padding-left:0}.result+.result .empty{padding-left:0}.method{display:block}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.drop{transition:none}}
+.saved{display:grid;gap:10px;min-height:180px;align-content:start;padding:24px;border:1px solid var(--line);border-radius:var(--radius)}.saved-date{font-size:clamp(28px,4vw,40px);line-height:1.1;font-weight:500;letter-spacing:-.035em;font-variant-numeric:tabular-nums}.saved-meta{color:var(--muted);font-size:14px;font-family:var(--mono);overflow-wrap:anywhere}.saved .button{justify-self:start;margin-top:8px}.saved.none .saved-date{color:var(--faint)}
+</style>
+</head>
+<body>
+<a class="skip" href="#workspace">跳到比對工具</a>
+<div class="shell">
+<header class="masthead"><span class="identity">Followers Compare</span><span class="local">Local browser tool</span></header>
+<main>
+<section class="opening" aria-labelledby="page-title"><h1 id="page-title">上傳最新的追蹤者紀錄。</h1><p>這個瀏覽器會記住上一次上傳的紀錄。每次放入新的 JSON，會自動與上次比較，再把這份存成下一次的比較基準。</p></section>
+<section class="workspace" id="workspace" aria-label="上傳追蹤者檔案">
+<div class="uploads">
+<div class="upload"><div class="upload-head"><h2>最新紀錄</h2><span class="sequence">Upload</span></div><label class="drop" id="drop"><span class="drop-copy"><strong>選擇 JSON 或拖放到這裡</strong><small>followers_1.json</small></span><input id="input" type="file" accept=".json,application/json" aria-label="選擇追蹤者 JSON" aria-describedby="error"></label><div class="file" id="file">尚未選擇檔案</div><div class="error" id="error" role="alert"></div></div>
+<div class="upload"><div class="upload-head"><h2>已儲存的紀錄</h2><span class="sequence">Saved</span></div><div class="saved none" id="saved"><span class="saved-date" id="saved-date">尚無紀錄</span><span class="saved-meta" id="saved-meta">第一次上傳後會存在這裡</span><button class="button" id="reset" type="button" hidden>刪除已儲存紀錄</button></div></div>
+</div>
+<div class="action-row"><p class="status" id="status" role="status" aria-live="polite">讀取已儲存紀錄中…</p></div>
+</section>
+<section class="evidence" aria-labelledby="summary-title">
+<div class="summary-head"><h2 id="summary-title">追蹤者變化</h2><p>帳號依 username 比對，相同名稱不重複計算。</p></div>
+<div class="stats"><div class="stat"><span class="stat-label" id="old-label">上次</span><strong class="stat-value" id="old-count">—</strong></div><div class="stat"><span class="stat-label" id="new-label">本次</span><strong class="stat-value" id="new-count">—</strong></div><div class="stat net"><span class="stat-label">淨變化 / Net change</span><strong class="stat-value" id="net-count">—</strong></div></div>
+<div class="results"><section class="result" aria-labelledby="added-title"><div class="result-head"><h3 id="added-title">新增帳號</h3><span class="count" id="added-count">—</span></div><div id="added-list" class="empty">等待上傳</div></section><section class="result" aria-labelledby="removed-title"><div class="result-head"><h3 id="removed-title">移除帳號</h3><span class="count" id="removed-count">—</span></div><div id="removed-list" class="empty">等待上傳</div></section></div>
+</section>
+</main>
+<footer class="method"><p>所有內容只在這個瀏覽器中處理，不會上傳到任何伺服器。上一次的紀錄存在此瀏覽器的 IndexedDB；換裝置、換瀏覽器或清除網站資料後就會消失。支援 Instagram followers 陣列，或包含 <code>relationships_followers</code> 陣列的物件；每筆讀取 <code>string_list_data[0].value</code>。</p></footer>
+</div>
+<script>
+'use strict';
+let saved=null,version=0;
+const $=id=>document.getElementById(id);
+const formatNumber=n=>n.toLocaleString('zh-TW');
+const formatDate=iso=>{const d=new Date(iso),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;};
+function parseFollowers(text){
+ let data;try{data=JSON.parse(text.replace(/^\uFEFF/,''));}catch{throw new Error('JSON 格式錯誤：無法解析內容。請使用完整、未修改的 JSON 匯出檔。');}
+ const rows=Array.isArray(data)?data:data&&data.relationships_followers;
+ if(!Array.isArray(rows))throw new Error('資料結構不符：最外層必須是陣列，或包含 relationships_followers 陣列的物件。');
+ const names=new Set();
+ rows.forEach((row,index)=>{
+  const list=row&&row.string_list_data;
+  const value=Array.isArray(list)&&list[0]&&list[0].value;
+  if(typeof value!=='string'||!value.trim())throw new Error(`第 ${index+1} 筆資料結構不符：需要非空字串 string_list_data[0].value。`);
+  names.add(value.trim().toLowerCase());
+ });
+ return {names,duplicates:rows.length-names.size};
+}
+function compare(before,after){const sort=items=>items.sort((a,b)=>a.localeCompare(b,'en',{sensitivity:'base'}));return{added:sort([...after].filter(name=>!before.has(name))),removed:sort([...before].filter(name=>!after.has(name))),net:after.size-before.size};}
+function renderList(id,names,emptyMessage){
+ const box=$(id);box.replaceChildren();box.className=names&&names.length?'':'empty';
+ if(!names||!names.length){box.textContent=emptyMessage;return;}
+ const list=document.createElement('ul'),fragment=document.createDocumentFragment();
+ for(const name of names){const item=document.createElement('li');item.textContent='@'+name;fragment.append(item);}
+ list.append(fragment);box.append(list);
+}
+function openDB(){return new Promise((resolve,reject)=>{if(!window.indexedDB)return reject(new Error('unsupported'));const request=indexedDB.open('followers-compare',1);request.onupgradeneeded=()=>request.result.createObjectStore('snapshot');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});}
+async function withStore(mode,fn){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction('snapshot',mode),request=fn(tx.objectStore('snapshot'));tx.oncomplete=()=>{db.close();resolve(request.result);};tx.onerror=tx.onabort=()=>{db.close();reject(tx.error);};});}
+const loadSnapshot=()=>withStore('readonly',store=>store.get('latest'));
+const saveSnapshot=snapshot=>withStore('readwrite',store=>store.put(snapshot,'latest'));
+const clearSnapshot=()=>withStore('readwrite',store=>store.delete('latest'));
+function renderSaved(){
+ $('saved').classList.toggle('none',!saved);$('reset').hidden=!saved;
+ $('saved-date').textContent=saved?formatDate(saved.savedAt):'尚無紀錄';
+ $('saved-meta').textContent=saved?`${formatNumber(saved.names.length)} 個帳號・${saved.fileName}`:'第一次上傳後會存在這裡';
+}
+function renderResult(before,after){
+ $('old-label').textContent=before?`上次・${formatDate(before.savedAt)}`:'上次';
+ $('new-label').textContent=after?`本次・${formatDate(after.savedAt)}`:'本次';
+ $('old-count').textContent=before?formatNumber(before.names.length):'—';
+ $('new-count').textContent=after?formatNumber(after.names.length):'—';
+ if(!before||!after){
+  const message=after?'這是第一份紀錄，下次上傳時會開始比對':'等待上傳';
+  $('net-count').textContent=$('added-count').textContent=$('removed-count').textContent='—';
+  renderList('added-list',null,message);renderList('removed-list',null,message);return null;
+ }
+ const result=compare(new Set(before.names),new Set(after.names));
+ $('net-count').textContent=(result.net>0?'+':'')+formatNumber(result.net);
+ $('added-count').textContent=formatNumber(result.added.length);$('removed-count').textContent=formatNumber(result.removed.length);
+ renderList('added-list',result.added,'沒有新增帳號');renderList('removed-list',result.removed,'沒有移除帳號');
+ return result;
+}
+function showFile(name,meta=''){
+ const box=$('file');box.textContent=name;
+ if(meta){const detail=document.createElement('span');detail.className='meta';detail.textContent=meta;box.append(detail);}
+}
+async function load(files){
+ const current=++version;$('error').textContent='';
+ if(files.length!==1){showFile('尚未載入有效檔案','請一次放入一份 JSON');$('error').textContent='一次只能上傳一份 JSON 檔案。';return;}
+ const file=files[0];showFile(file.name,'讀取中…');
+ let parsed;
+ try{
+  let text;try{text=await file.text();}catch{throw new Error('無法讀取檔案，請重新選擇。');}
+  if(current!==version)return;
+  parsed=parseFollowers(text);
+ }catch(error){if(current!==version)return;showFile(file.name,'載入失敗');$('error').textContent=error.message;return;}
+ const before=saved,after={names:[...parsed.names].sort(),savedAt:new Date().toISOString(),fileName:file.name};
+ showFile(file.name,`${formatNumber(parsed.names.size)} 個帳號`+(parsed.duplicates?`，已合併 ${formatNumber(parsed.duplicates)} 筆重複紀錄`:''));
+ const result=renderResult(before,after);
+ try{
+  await saveSnapshot(after);if(current!==version)return;
+  if(!before&&navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
+  saved=after;renderSaved();
+  $('status').textContent=result?`比對完成：新增 ${formatNumber(result.added.length)} 個，移除 ${formatNumber(result.removed.length)} 個帳號。本次紀錄已取代 ${formatDate(before.savedAt)} 的紀錄。`:`已儲存 ${formatDate(after.savedAt)} 的 ${formatNumber(after.names.length)} 個帳號，下次上傳時會自動比對。`;
+ }catch{
+  if(current!==version)return;
+  $('status').textContent=(result?`比對完成：新增 ${formatNumber(result.added.length)} 個，移除 ${formatNumber(result.removed.length)} 個帳號。`:'')+'但無法儲存這份紀錄（瀏覽器可能停用了網站儲存或正在使用無痕模式）。';
+ }
+}
+const input=$('input'),drop=$('drop');
+input.addEventListener('change',()=>{if(input.files.length)load([...input.files]);input.value='';});
+drop.addEventListener('dragover',event=>{event.preventDefault();drop.classList.add('drag');});
+drop.addEventListener('dragleave',()=>drop.classList.remove('drag'));
+drop.addEventListener('drop',event=>{event.preventDefault();drop.classList.remove('drag');load([...event.dataTransfer.files]);});
+window.addEventListener('dragover',event=>event.preventDefault());
+window.addEventListener('drop',event=>event.preventDefault());
+$('reset').addEventListener('click',async()=>{
+ if(!saved||!confirm(`確定刪除 ${formatDate(saved.savedAt)} 的已儲存紀錄？刪除後下一次上傳會重新開始。`))return;
+ try{await clearSnapshot();version++;saved=null;renderSaved();renderResult(null,null);showFile('尚未選擇檔案');$('error').textContent='';$('status').textContent='已刪除儲存的紀錄。';}
+ catch{$('status').textContent='刪除失敗，請重新整理後再試。';}
+});
+loadSnapshot().then(snapshot=>{
+ saved=snapshot&&Array.isArray(snapshot.names)?snapshot:null;renderSaved();
+ $('status').textContent=saved?`已找到 ${formatDate(saved.savedAt)} 的紀錄，上傳新的 JSON 即可比對。`:'尚無已儲存紀錄。上傳第一份 JSON 後會存起來作為比較基準。';
+}).catch(()=>{renderSaved();$('status').textContent='這個瀏覽器無法使用網站儲存，只能讀取檔案、無法記住上一次紀錄。';});
+</script>
+</body>
+</html>

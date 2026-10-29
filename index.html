@@ -8,56 +8,630 @@
   <link rel="icon" href="data:,">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400&display=swap">
   <style>
     :root {
-      --bg: #fefefe;
+      --bg: #ffffff;
       --text: #121212;
+      --muted: #8a8a8a;
+      --line: #ececec;
+      --tile: #ffffff;
+      --shadow: 0 2px 4px rgba(0, 0, 0, .04);
+      --on-text: #ffffff;
+      --dot: #d2d2d2;
+      --scrim: rgba(0, 0, 0, .32);
+      --cell: 175px;
+      --gap: 40px;
+      --panel-pad: 24px;
     }
     @media (prefers-color-scheme: dark) {
       :root {
         --bg: #121212;
-        --text: #afafaf;
+        --text: #e4e4e4;
+        --muted: #7c7c7c;
+        --line: #262626;
+        --tile: #181818;
+        --shadow: none;
+        --on-text: #121212;
+        --dot: #3a3a3a;
+        --scrim: rgba(0, 0, 0, .6);
+        color-scheme: dark;
       }
     }
     html {
       font-family: "IBM Plex Sans", sans-serif;
-      font-weight: 300;
       color: var(--text);
       background: var(--bg);
     }
     body {
+      margin: 0;
+      padding: 64px 16px;
+    }
+    button {
+      font: inherit;
+      color: inherit;
+    }
+    :focus-visible {
+      outline: 2px solid var(--text);
+      outline-offset: 3px;
+    }
+
+    /* Page: profile column + bento grid */
+    .page {
+      display: flex;
+      justify-content: space-between;
+      gap: 64px;
+      max-width: 1340px;
       margin: 0 auto;
-      max-width: 960px;
-      padding: 0 1.0875rem 1.45rem;
     }
-    img {
+    .profile {
+      flex: 0 1 420px;
+      min-width: 0;
+      position: sticky;
+      top: 64px;
+      align-self: flex-start;
+      padding-left: 16px;
+    }
+    .avatar {
       display: block;
-      width: 100%;
-      max-width: 300px;
-      height: auto;
-      margin-bottom: 1.45rem;
-      mix-blend-mode: multiply;
+      width: 184px;
+      height: 184px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 0 0 1px var(--line);
     }
-    @media (prefers-color-scheme: dark) {
-      img {
-        filter: invert(1);
-        mix-blend-mode: screen;
+    .profile h1 {
+      font-size: 2.75rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin: 32px 0 12px;
+    }
+    .profile p {
+      font-size: 1.25rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: 26em;
+      margin: 0;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, var(--cell));
+      grid-auto-rows: var(--cell);
+      grid-auto-flow: dense;
+      gap: var(--gap);
+      flex: none;
+    }
+    .tile {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-start;
+      min-width: 0;
+      box-sizing: border-box;
+      padding: 24px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--tile);
+      box-shadow: var(--shadow);
+    }
+    .w2 {
+      grid-column: span 2;
+    }
+    .num {
+      font-size: 3rem;
+      font-weight: 600;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .num-label {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.35;
+      margin-top: 8px;
+    }
+    .nowrap {
+      white-space: nowrap;
+    }
+    .pill {
+      flex: none;
+      padding: 8px 18px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--text);
+      color: var(--bg);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .pill:hover {
+      opacity: .85;
+    }
+    .cafe {
+      border: 0;
+      color: #ffffff;
+      background: #6b2c0d url("assets/cafe.webp") center / cover no-repeat;
+    }
+    .cafe .num,
+    .cafe .num-label {
+      text-shadow: 0 1px 2px rgba(0, 0, 0, .45);
+    }
+    .cafe .num-label {
+      color: rgba(255, 255, 255, .85);
+    }
+
+    @media (max-width: 1300px) {
+      :root {
+        --cell: 160px;
+        --gap: 24px;
+      }
+      .page {
+        gap: 40px;
       }
     }
-    p {
-      line-height: 1.6em;
+    @media (max-width: 1080px) {
+      body {
+        padding: 32px 16px 48px;
+      }
+      .page {
+        flex-direction: column;
+        gap: 40px;
+      }
+      .profile {
+        position: static;
+        flex: none;
+        padding-left: 0;
+      }
+      .avatar {
+        width: 120px;
+        height: 120px;
+      }
+      .profile h1 {
+        font-size: 2rem;
+        margin-top: 20px;
+      }
+      .profile p {
+        font-size: 1.0625rem;
+      }
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-rows: auto;
+        gap: 16px;
+        width: 100%;
+        max-width: 420px;
+      }
+      .tile {
+        aspect-ratio: 1;
+        padding: 18px;
+        border-radius: 20px;
+      }
+      .tile.w2 {
+        aspect-ratio: 2 / 1;
+      }
+      .num {
+        font-size: 2.5rem;
+      }
+      .num-label {
+        font-size: 0.8125rem;
+      }
     }
-    .name {
+
+    /* Square dialogs */
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      box-sizing: border-box;
+      padding: 16px;
+      background: var(--scrim);
+      animation: fade .15s ease-out;
+    }
+    @keyframes fade {
+      from { opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .modal { animation: none; }
+    }
+    .modal[hidden] {
+      display: none;
+    }
+    .panel {
+      position: relative;
+      width: min(100%, 680px, calc(100dvh - 32px));
+      aspect-ratio: 1;
+      box-sizing: border-box;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--bg);
+    }
+    @media (max-width: 560px) {
+      :root {
+        --panel-pad: 16px;
+      }
+    }
+    .icon-btn {
+      display: grid;
+      place-items: center;
+      flex: none;
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--bg);
+      font-size: 1rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .icon-btn:hover:not(:disabled) {
+      border-color: var(--text);
+    }
+    .icon-btn:disabled {
+      opacity: .3;
+      cursor: default;
+    }
+    .close {
+      position: absolute;
+      top: var(--panel-pad);
+      right: var(--panel-pad);
+    }
+
+    /* Stay calendar */
+    .cal-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: var(--panel-pad);
+    }
+    .cal-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-right: 44px;
+    }
+    .cal-head h2 {
+      margin: 0 auto 0 0;
+      font-size: 1.25rem;
       font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .cal {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      grid-template-rows: auto;
+      grid-auto-rows: 1fr;
+      gap: 4px;
+    }
+    .dow {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: center;
+      align-self: end;
+      padding-bottom: 4px;
+    }
+    .day {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      border-radius: 6px;
+      font-size: 0.9375rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--muted);
+      opacity: .4;
+    }
+    .day.open {
+      background: var(--text);
+      color: var(--on-text);
+      font-weight: 600;
+      opacity: 1;
+    }
+    .day.booked {
+      background: repeating-linear-gradient(135deg, var(--line) 0 2px, transparent 2px 6px);
+      box-shadow: inset 0 0 0 1px var(--line);
+      text-decoration: line-through;
+      opacity: 1;
+    }
+    .day.past {
+      background: none;
+      box-shadow: none;
+      text-decoration: none;
+      opacity: .2;
+    }
+    .day.today::after {
+      content: "";
+      position: absolute;
+      bottom: 12%;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .legend {
+      display: flex;
+      gap: 20px;
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .swatch {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+    .swatch.open {
+      background: var(--text);
+    }
+    .swatch.booked {
+      background: repeating-linear-gradient(135deg, var(--line) 0 2px, transparent 2px 5px);
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
+
+    /* Café map */
+    .map {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .map .land {
+      color: var(--dot);
+    }
+    .map circle {
+      fill: var(--text);
+      stroke: var(--bg);
+      stroke-width: 4;
+    }
+    .map text {
+      fill: var(--text);
+      font-size: 22px;
+      font-weight: 600;
+      paint-order: stroke;
+      stroke: var(--bg);
+      stroke-width: 6px;
+      stroke-linejoin: round;
+    }
+    .map a:hover text,
+    .map a:focus-visible text {
+      text-decoration: underline;
+    }
+    .map a:focus-visible {
+      outline: none;
+    }
+    .map a:focus-visible circle {
+      stroke: var(--text);
+      stroke-width: 2;
     }
   </style>
 </head>
 <body>
-  <main>
-    <img src="profile.webp" alt="Kent Yang" width="2000" height="2000">
-    <p class="name">Kent Yang</p>
-    <p>Product Designer based in Tokyo.<br>I recognize design as a method, a process, and a journey to build relationships.</p>
-  </main>
+  <div class="page">
+    <header class="profile">
+      <img class="avatar" src="assets/avatar.jpg" alt="Kent Yang" width="600" height="600">
+      <h1>Kent Yang</h1>
+      <p>Product Designer based in Tokyo.<br>I recognize design as a method, a process, and a journey to build relationships.</p>
+    </header>
+
+    <main class="grid">
+      <section class="tile" aria-label="中野居">
+        <div>
+          <div class="num" id="nights">–</div>
+          <div class="num-label">Nights hosted at <span class="nowrap">中野居</span></div>
+        </div>
+        <button class="pill" id="open-stay" type="button" aria-haspopup="dialog" aria-label="Stay! See open dates">Stay!</button>
+      </section>
+      <section class="tile w2 cafe" aria-label="Café maps">
+        <div>
+          <div class="num" id="cafes">–</div>
+          <div class="num-label">Cafés visited</div>
+        </div>
+        <button class="pill" id="open-map" type="button" aria-haspopup="dialog" aria-label="Hop! Open café maps">Hop!</button>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="stay-modal" role="dialog" aria-modal="true" aria-label="Open dates at 中野居" hidden>
+    <div class="panel cal-panel">
+      <div class="cal-head">
+        <h2 id="cal-month"></h2>
+        <button class="icon-btn" id="prev" type="button" aria-label="Previous month">‹</button>
+        <button class="icon-btn" id="next" type="button" aria-label="Next month">›</button>
+      </div>
+      <div class="cal" id="cal"></div>
+      <div class="legend">
+        <span><i class="swatch open"></i>Available</span>
+        <span><i class="swatch booked"></i>Booked</span>
+      </div>
+      <button class="icon-btn close" type="button" aria-label="Close">✕</button>
+    </div>
+  </div>
+
+  <div class="modal" id="map-modal" role="dialog" aria-modal="true" aria-label="Café maps" hidden>
+    <div class="panel">
+      <svg class="map" id="map" viewBox="0 0 800 800" role="img" aria-label="Map of East and Southeast Asia with café map cities">
+        <use class="land" href="assets/asia-dots.svg#land"></use>
+      </svg>
+      <button class="icon-btn close" type="button" aria-label="Close">✕</button>
+    </div>
+  </div>
+
+  <script>
+    // Google Calendar with all-day events titled "Available" or "Booked".
+    // End dates are exclusive; each Booked day counts as one night.
+    // GitHub Pages has no backend, so the key ships to the browser. It only reads this
+    // public calendar: Google Cloud limits it to the Calendar API and nktx.github.io.
+    const CALENDAR_ID = "26b88782a2137f79c9e5524e18717048eb45a5017b4c2f98f12e9776b28305db@group.calendar.google.com";
+    const CALENDAR_API_KEY = "AIzaSyDWvU8CqmbO30ni7Q6lR0QZFv4s2xD6V9k";
+
+    // Google Sheet published as CSV: one "key,value" pair per row.
+    const SHEET_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRsjqEKd9H915_BJQxuPWgG66P3SRcIn9EWXcfqLX8eJt9Im_teGuY1PFzmJAnQ95DPx5Npa8nHpHq/pub?output=csv";
+
+    // Positions are in the 800×800 space of assets/asia-dots.svg.
+    const CITIES = [
+      { name: "Tokyo", x: 723.8, y: 186.1, side: "left", url: "https://maps.app.goo.gl/jXFLabRnFoQiWhTQ9" },
+      { name: "Taipei", x: 440.1, y: 379.9, url: "https://maps.app.goo.gl/qVp1DhptNJtFrWtt9" },
+      { name: "Tainan", x: 418.9, y: 414.9, url: "https://maps.app.goo.gl/B6BGc3rBKv6AhGwF9" },
+      { name: "Hanoi", x: 194.2, y: 447.9, url: "https://maps.app.goo.gl/jRvSsHXZUCjntQqk9" },
+      { name: "Chiang Mai", x: 86.8, y: 485.2, url: "https://maps.app.goo.gl/iivpBbbK3RJSAP6V8" },
+      { name: "Bangkok", x: 110.4, y: 567.3, url: "https://maps.app.goo.gl/x2kY2qhcD4aP9PEfA" },
+      { name: "Ho Chi Minh City", x: 207.5, y: 615, url: "https://maps.app.goo.gl/iAvhYiT5WkZP8Rvy7" },
+    ];
+
+    const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const pad = n => String(n).padStart(2, "0");
+    const key = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const parseDate = s => new Date(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10));
+    const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    // Stay
+
+    const available = new Set();
+    const booked = new Set();
+
+    async function loadStays() {
+      const items = [];
+      let pageToken = "";
+      do {
+        const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events`);
+        url.search = new URLSearchParams({ key: CALENDAR_API_KEY, singleEvents: "true", maxResults: "2500", ...(pageToken && { pageToken }) });
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Calendar ${res.status}`);
+        const data = await res.json();
+        items.push(...data.items);
+        pageToken = data.nextPageToken;
+      } while (pageToken);
+
+      for (const ev of items) {
+        const kind = (ev.summary || "").trim().toLowerCase();
+        const target = kind === "available" ? available : kind === "booked" ? booked : null;
+        if (!target || !ev.start || !ev.end) continue;
+        const start = parseDate(ev.start.date || ev.start.dateTime);
+        const end = ev.end.date ? parseDate(ev.end.date) : addDays(parseDate(ev.end.dateTime), 1);
+        for (let d = start; d < end; d = addDays(d, 1)) target.add(key(d));
+      }
+      const todayKey = key(today);
+      document.getElementById("nights").textContent = [...booked].filter(k => k < todayKey).length;
+    }
+
+    function stateOf(d) {
+      if (d < today) return "past";
+      if (booked.has(key(d))) return "booked";
+      if (available.has(key(d))) return "open";
+      return "closed";
+    }
+
+    let view = thisMonth;
+
+    function renderCalendar() {
+      const y = view.getFullYear();
+      const m = view.getMonth();
+      const days = new Date(y, m + 1, 0).getDate();
+      const lead = (view.getDay() + 6) % 7;
+      let html = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(d => `<div class="dow">${d}</div>`).join("");
+      html += "<div></div>".repeat(lead);
+      for (let i = 1; i <= days; i++) {
+        const d = new Date(y, m, i);
+        const state = stateOf(d);
+        const today_ = +d === +today ? " today" : "";
+        html += `<div class="day ${state}${today_}" aria-label="${MONTHS[m]} ${i}, ${state}">${i}</div>`;
+      }
+      // Always six week rows so the square keeps the same proportions.
+      html += "<div></div>".repeat(42 - lead - days);
+      document.getElementById("cal").innerHTML = html;
+      document.getElementById("cal-month").textContent = `${MONTHS[m]} ${y}`;
+      document.getElementById("prev").disabled = view <= thisMonth;
+    }
+
+    function firstOpenMonth() {
+      const next = [...available].filter(k => !booked.has(k) && parseDate(k) >= today).sort()[0];
+      return next ? new Date(+next.slice(0, 4), +next.slice(5, 7) - 1, 1) : thisMonth;
+    }
+
+    document.getElementById("prev").onclick = () => {
+      view = new Date(view.getFullYear(), view.getMonth() - 1, 1);
+      renderCalendar();
+    };
+    document.getElementById("next").onclick = () => {
+      view = new Date(view.getFullYear(), view.getMonth() + 1, 1);
+      renderCalendar();
+    };
+
+    // Cafés
+
+    async function loadSheet() {
+      const res = await fetch(SHEET_CSV);
+      if (!res.ok) throw new Error(`Sheet ${res.status}`);
+      const values = {};
+      for (const line of (await res.text()).split(/\r?\n/)) {
+        const i = line.indexOf(",");
+        if (i > 0) values[line.slice(0, i).trim()] = line.slice(i + 1).trim().replace(/^"|"$/g, "");
+      }
+      if (values.cafes_visited) document.getElementById("cafes").textContent = Number(values.cafes_visited).toLocaleString("en-US");
+    }
+
+    const svgNS = "http://www.w3.org/2000/svg";
+    const map = document.getElementById("map");
+    for (const c of CITIES) {
+      const left = c.side === "left";
+      const a = document.createElementNS(svgNS, "a");
+      a.setAttribute("href", c.url);
+      a.setAttribute("target", "_blank");
+      a.setAttribute("rel", "noopener");
+      a.innerHTML = `<circle cx="${c.x}" cy="${c.y}" r="8"></circle><text x="${left ? c.x - 16 : c.x + 16}" y="${c.y + 8}" text-anchor="${left ? "end" : "start"}">${c.name}</text>`;
+      map.appendChild(a);
+    }
+
+    // Dialogs
+
+    let opener = null;
+
+    function openModal(id, trigger) {
+      opener = trigger;
+      const modal = document.getElementById(id);
+      modal.hidden = false;
+      document.body.style.overflow = "hidden";
+      modal.querySelector(".close").focus();
+    }
+
+    function closeModals() {
+      for (const modal of document.querySelectorAll(".modal")) modal.hidden = true;
+      document.body.style.overflow = "";
+      opener?.focus();
+    }
+
+    const stayButton = document.getElementById("open-stay");
+    stayButton.onclick = () => {
+      view = firstOpenMonth();
+      renderCalendar();
+      openModal("stay-modal", stayButton);
+    };
+    const mapButton = document.getElementById("open-map");
+    mapButton.onclick = () => openModal("map-modal", mapButton);
+    for (const btn of document.querySelectorAll(".close")) btn.onclick = closeModals;
+    for (const modal of document.querySelectorAll(".modal")) {
+      modal.addEventListener("click", e => { if (e.target === modal) closeModals(); });
+    }
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeModals(); });
+
+    loadStays().catch(console.error);
+    loadSheet().catch(console.error);
+  </script>
 </body>
 </html>

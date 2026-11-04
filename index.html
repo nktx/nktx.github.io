@@ -15,14 +15,24 @@
       --text: #121212;
       --muted: #8a8a8a;
       --line: #ececec;
-      --tile: #ffffff;
-      --shadow: 0 2px 4px rgba(0, 0, 0, .04);
+      --ink-strong: rgba(0, 0, 0, .8);
+      --ink-soft: rgba(0, 0, 0, .6);
+      /* Card edge and hover glow; the dark set is also used on .tile-fill
+         cards in both themes. */
+      --edge-dark: rgba(255, 255, 255, .2);
+      --glow-dark: rgba(255, 255, 255, .5);
+      --glow-mid-dark: rgba(255, 255, 255, .25);
+      --edge: rgba(0, 0, 0, .1);
+      --glow: rgba(0, 0, 0, .25);
+      --glow-mid: rgba(0, 0, 0, .125);
       --on-text: #ffffff;
       --dot: #d2d2d2;
       --scrim: rgba(0, 0, 0, .32);
-      --cell: 175px;
-      --gap: 40px;
+      --cell: 160px;
+      --gap: 24px;
       --panel-pad: 24px;
+      --card-ease: cubic-bezier(.165, .84, .44, 1);
+      --card-duration: 400ms;
     }
     @media (prefers-color-scheme: dark) {
       :root {
@@ -30,8 +40,11 @@
         --text: #e4e4e4;
         --muted: #7c7c7c;
         --line: #262626;
-        --tile: #181818;
-        --shadow: none;
+        --ink-strong: rgba(255, 255, 255, .8);
+        --ink-soft: rgba(255, 255, 255, .6);
+        --edge: var(--edge-dark);
+        --glow: var(--glow-dark);
+        --glow-mid: var(--glow-mid-dark);
         --on-text: #121212;
         --dot: #3a3a3a;
         --scrim: rgba(0, 0, 0, .6);
@@ -45,7 +58,6 @@
     }
     body {
       margin: 0;
-      padding: 64px 16px;
     }
     button {
       font: inherit;
@@ -58,53 +70,78 @@
 
     /* Page: profile column + bento grid */
     .page {
+      container-type: inline-size;
       display: flex;
-      justify-content: space-between;
-      gap: 64px;
-      max-width: 1340px;
+      align-items: flex-start;
+      gap: 72px;
+      box-sizing: border-box;
+      max-width: 1280px;
       margin: 0 auto;
+      padding: 80px 48px;
     }
     .profile {
-      flex: 0 1 420px;
-      min-width: 0;
-      position: sticky;
-      top: 64px;
-      align-self: flex-start;
-      padding-left: 16px;
+      flex: none;
+      width: 400px;
+      margin-top: 16px;
     }
     .avatar {
-      display: block;
-      width: 184px;
-      height: 184px;
-      border-radius: 50%;
-      object-fit: cover;
-      box-shadow: 0 0 0 1px var(--line);
+      width: 160px;
+      height: 160px;
+    }
+    .avatar .tile-media {
+      background-image: url("assets/avatar.jpg");
     }
     .profile h1 {
-      font-size: 2.75rem;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      line-height: 1.1;
-      margin: 32px 0 12px;
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--ink-strong);
+      margin: 48px 0 24px;
     }
     .profile p {
-      font-size: 1.25rem;
-      font-weight: 300;
-      color: var(--muted);
+      font-size: 1rem;
+      letter-spacing: -0.02em;
       line-height: 1.5;
-      max-width: 26em;
+      color: var(--ink-soft);
       margin: 0;
     }
+
+    /* The design has ten slots, named here in reading order:
+         desktop / tablet     mobile
+         a b d d              a b
+         c c d d              c c
+         e f h i              d d
+         e g j j              d d
+                              e f
+                              e g
+                              h i
+                              j j
+       Each breakpoint places cards by name in its own template, so a card can
+       move on one device without changing the markup order. */
     .grid {
       display: grid;
-      grid-template-columns: repeat(4, var(--cell));
+      grid-template-areas:
+        "a stay d d"
+        "c c d d"
+        "e f h i"
+        "e g cafe cafe";
+      grid-auto-columns: var(--cell);
       grid-auto-rows: var(--cell);
-      grid-auto-flow: dense;
       gap: var(--gap);
       flex: none;
     }
+    .stay {
+      grid-area: stay;
+    }
+    .cafe {
+      grid-area: cafe;
+    }
     .tile {
+      --grow-x: 2px;
+      --grow-y: 2px;
       position: relative;
+      isolation: isolate;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -112,14 +149,90 @@
       min-width: 0;
       box-sizing: border-box;
       padding: 24px;
-      overflow: hidden;
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      background: var(--tile);
-      box-shadow: var(--shadow);
     }
-    .w2 {
-      grid-column: span 2;
+    .tile-surface,
+    .tile-edge {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .tile-edge {
+      background: var(--edge);
+    }
+    /* Cards filled edge to edge with a color, pattern or photo keep the dark
+       theme's light edge and glow in both themes, as a thin translucent line
+       over the fill. */
+    .tile-fill {
+      --edge: var(--edge-dark);
+      --glow: var(--glow-dark);
+      --glow-mid: var(--glow-mid-dark);
+    }
+    /* Figma radius 32 with 60% corner smoothing, as 9-slice masks; the smoothed
+       corner spans 51.2px, inside the 52px slice. */
+    @supports (-webkit-mask-box-image: none) {
+      .tile-surface {
+        -webkit-mask-box-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath fill-rule='evenodd' d='M68.8 0c17.922 0 26.883 0 33.728 3.488a32 32 0 0 1 13.985 13.985c3.488 6.845 3.488 15.806 3.488 33.728L120 68.8c0 17.922 0 26.883 -3.488 33.728a32 32 0 0 1 -13.985 13.985c-6.845 3.488 -15.806 3.488 -33.728 3.488L51.2 120c-17.922 0 -26.883 0 -33.728 -3.488a32 32 0 0 1 -13.985 -13.985c-3.488 -6.845 -3.488 -15.806 -3.488 -33.728L0 51.2c0 -17.922 0 -26.883 3.488 -33.728a32 32 0 0 1 13.985 -13.985c6.845 -3.488 15.806 -3.488 33.728 -3.488Z'/%3E%3C/svg%3E") 52 fill / 52px;
+      }
+      .tile-edge {
+        -webkit-mask-box-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath fill-rule='evenodd' d='M68.8 0c17.922 0 26.883 0 33.728 3.488a32 32 0 0 1 13.985 13.985c3.488 6.845 3.488 15.806 3.488 33.728L120 68.8c0 17.922 0 26.883 -3.488 33.728a32 32 0 0 1 -13.985 13.985c-6.845 3.488 -15.806 3.488 -33.728 3.488L51.2 120c-17.922 0 -26.883 0 -33.728 -3.488a32 32 0 0 1 -13.985 -13.985c-3.488 -6.845 -3.488 -15.806 -3.488 -33.728L0 51.2c0 -17.922 0 -26.883 3.488 -33.728a32 32 0 0 1 13.985 -13.985c6.845 -3.488 15.806 -3.488 33.728 -3.488ZM69.4 1c17.362 0 26.043 0 32.674 3.379a31 31 0 0 1 13.547 13.547c3.379 6.631 3.379 15.312 3.379 32.674L119 69.4c0 17.362 0 26.043 -3.379 32.674a31 31 0 0 1 -13.547 13.547c-6.631 3.379 -15.312 3.379 -32.674 3.379L50.6 119c-17.362 0 -26.043 0 -32.674 -3.379a31 31 0 0 1 -13.547 -13.547c-3.379 -6.631 -3.379 -15.312 -3.379 -32.674L1 50.6c0 -17.362 0 -26.043 3.379 -32.674a31 31 0 0 1 13.547 -13.547c6.631 -3.379 15.312 -3.379 32.674 -3.379Z'/%3E%3C/svg%3E") 52 fill / 52px;
+      }
+    }
+    @supports not (-webkit-mask-box-image: none) {
+      .tile-surface {
+        border-radius: 32px;
+      }
+      .tile-edge {
+        padding: 1px;
+        border-radius: 32px;
+        mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+      }
+    }
+    /* Round cards, like the avatar: a circle in place of the squircle. */
+    .tile-circle .tile-surface,
+    .tile-circle .tile-edge {
+      -webkit-mask-box-image: none;
+      border-radius: 50%;
+    }
+    .tile-circle .tile-edge {
+      padding: 1px;
+      mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    }
+    /* A glow that sits where the line from the card's center toward the cursor
+       meets the edge; it only shows through the edge's 1px ring. */
+    .tile-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      height: 80%;
+      aspect-ratio: 1;
+      opacity: 0;
+      translate: -50% -50%;
+      transform: translate(var(--glow-x, 0), var(--glow-y, 0));
+      background: radial-gradient(circle, var(--glow), var(--glow-mid) 33%, transparent 66%);
+    }
+    /* Hover grows the card's surface and edge outward by --grow-x/y (set from
+       its size by script) instead of scaling, so the content stays crisp. */
+    @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+      .tile-surface,
+      .tile-edge,
+      .tile-media {
+        transition: inset var(--card-duration) var(--card-ease);
+      }
+      .tile:hover .tile-surface,
+      .tile:hover .tile-edge {
+        inset: calc(-1 * var(--grow-y)) calc(-1 * var(--grow-x));
+      }
+      .tile:hover .tile-media {
+        inset: 0;
+      }
+      .tile-glow {
+        transition: opacity .25s linear, transform 1s cubic-bezier(.16, 1, .3, 1);
+      }
+      .tile:hover .tile-glow {
+        opacity: 1;
+      }
     }
     .num {
       font-size: 3rem;
@@ -151,10 +264,19 @@
     .pill:hover {
       opacity: .85;
     }
+    /* A photo inside .tile-surface stays put while the surface grows over it:
+       it starts as large as the grown card and shrinks its inset in step. */
+    .tile-media {
+      position: absolute;
+      inset: calc(-1 * var(--grow-y)) calc(-1 * var(--grow-x));
+      background: center / cover no-repeat;
+    }
     .cafe {
-      border: 0;
       color: #ffffff;
-      background: #6b2c0d url("assets/cafe.webp") center / cover no-repeat;
+    }
+    .cafe .tile-media {
+      background-color: #6b2c0d;
+      background-image: url("assets/cafe.webp");
     }
     .cafe .num,
     .cafe .num-label {
@@ -164,59 +286,45 @@
       color: rgba(255, 255, 255, .85);
     }
 
-    @media (max-width: 1300px) {
-      :root {
-        --cell: 160px;
-        --gap: 24px;
-      }
-      .page {
-        gap: 40px;
-      }
-    }
-    @media (max-width: 1080px) {
-      body {
-        padding: 32px 16px 48px;
-      }
+    /* Tablet: profile above the same four-column grid */
+    @media (max-width: 1279px) {
       .page {
         flex-direction: column;
-        gap: 40px;
+        gap: 48px;
+        max-width: 808px;
+        padding: 96px 48px 48px;
       }
       .profile {
-        position: static;
-        flex: none;
-        padding-left: 0;
+        margin-top: 0;
+      }
+    }
+
+    /* Mobile: two columns that split the width left after padding and gap */
+    @media (max-width: 807px) {
+      .page {
+        padding: 48px 32px;
+      }
+      .profile {
+        width: auto;
       }
       .avatar {
         width: 120px;
         height: 120px;
       }
       .profile h1 {
-        font-size: 2rem;
-        margin-top: 20px;
-      }
-      .profile p {
-        font-size: 1.0625rem;
+        margin: 40px 0 16px;
       }
       .grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        grid-auto-rows: auto;
-        gap: 16px;
-        width: 100%;
-        max-width: 420px;
-      }
-      .tile {
-        aspect-ratio: 1;
-        padding: 18px;
-        border-radius: 20px;
-      }
-      .tile.w2 {
-        aspect-ratio: 2 / 1;
-      }
-      .num {
-        font-size: 2.5rem;
-      }
-      .num-label {
-        font-size: 0.8125rem;
+        --cell: calc((100cqi - var(--gap)) / 2);
+        grid-template-areas:
+          "a stay"
+          "c c"
+          "d d"
+          "d d"
+          "e f"
+          "e g"
+          "h i"
+          "cafe cafe";
       }
     }
 
@@ -421,26 +529,42 @@
 <body>
   <div class="page">
     <header class="profile">
-      <img class="avatar" src="assets/avatar.jpg" alt="Kent Yang" width="600" height="600">
+      <div class="tile tile-fill tile-circle avatar" role="img" aria-label="Kent Yang">
+        <div class="tile-surface"><div class="tile-media"></div></div>
+        <div class="tile-edge"><div class="tile-glow"></div></div>
+      </div>
       <h1>Kent Yang</h1>
       <p>Product Designer based in Tokyo.<br>I recognize design as a method, a process, and a journey to build relationships.</p>
     </header>
 
     <main class="grid">
-      <section class="tile" aria-label="中野居">
+      <section class="tile stay" aria-label="中野居">
+        <div class="tile-surface"></div>
+        <div class="tile-edge"><div class="tile-glow"></div></div>
         <div>
           <div class="num" id="nights">–</div>
           <div class="num-label">Nights hosted at <span class="nowrap">中野居</span></div>
         </div>
         <button class="pill" id="open-stay" type="button" aria-haspopup="dialog" aria-label="Stay! See open dates">Stay!</button>
       </section>
-      <section class="tile w2 cafe" aria-label="Café maps">
+      <section class="tile tile-fill cafe" aria-label="Café maps">
+        <div class="tile-surface"><div class="tile-media"></div></div>
+        <div class="tile-edge"><div class="tile-glow"></div></div>
         <div>
           <div class="num" id="cafes">–</div>
           <div class="num-label">Cafés visited</div>
         </div>
         <button class="pill" id="open-map" type="button" aria-haspopup="dialog" aria-label="Hop! Open café maps">Hop!</button>
       </section>
+      <!-- Empty slots, kept by their slot letter until their cards are designed -->
+      <div class="tile" style="grid-area: a" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
+      <div class="tile" style="grid-area: c" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
+      <div class="tile" style="grid-area: d" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
+      <div class="tile" style="grid-area: e" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
+      <div class="tile" style="grid-area: f" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
+      <div class="tile" style="grid-area: g" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
+      <div class="tile" style="grid-area: h" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
+      <div class="tile" style="grid-area: i" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
     </main>
   </div>
 
@@ -596,6 +720,38 @@
       a.setAttribute("rel", "noopener");
       a.innerHTML = `<circle cx="${c.x}" cy="${c.y}" r="8"></circle><text x="${left ? c.x - 16 : c.x + 16}" y="${c.y + 8}" text-anchor="${left ? "end" : "start"}">${c.name}</text>`;
       map.appendChild(a);
+    }
+
+    // Card hover
+
+    // Like Stripe's bento cards: each card grows 4px in height and by the same
+    // ratio in width, so every card keeps its proportions.
+    const GROW = 4;
+    const sizer = new ResizeObserver(entries => {
+      for (const { target, borderBoxSize: [box] } of entries) {
+        const y = GROW / 2;
+        target.style.setProperty("--grow-x", `${box.inlineSize / box.blockSize * y}px`);
+        target.style.setProperty("--grow-y", `${y}px`);
+      }
+    });
+    for (const tile of document.querySelectorAll(".tile")) {
+      sizer.observe(tile);
+      const glow = tile.querySelector(".tile-glow");
+      tile.addEventListener("pointermove", e => {
+        const r = tile.getBoundingClientRect();
+        const dx = e.clientX - r.left - r.width / 2;
+        const dy = e.clientY - r.top - r.height / 2;
+        // Scale the center-to-cursor vector until it reaches the edge: the
+        // circle for round cards, else the nearer side.
+        // Back to the card's own pixels in case it's zoomed or transformed.
+        const reach = tile.classList.contains("tile-circle")
+          ? r.width / 2 / Math.hypot(dx, dy)
+          : Math.min(r.width / 2 / Math.abs(dx), r.height / 2 / Math.abs(dy));
+        const t = reach * tile.offsetWidth / r.width;
+        if (!Number.isFinite(t)) return;
+        glow.style.setProperty("--glow-x", `${dx * t}px`);
+        glow.style.setProperty("--glow-y", `${dy * t}px`);
+      });
     }
 
     // Dialogs

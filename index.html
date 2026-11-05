@@ -8,13 +8,11 @@
   <link rel="icon" href="data:,">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;600;700&display=swap">
   <style>
     :root {
       --bg: #ffffff;
       --text: #121212;
-      --muted: #8a8a8a;
-      --line: #ececec;
       --ink-strong: rgba(0, 0, 0, .8);
       --ink-soft: rgba(0, 0, 0, .6);
       /* Card edge and hover glow; the dark set is also used on .tile-fill
@@ -26,11 +24,12 @@
       --glow: rgba(0, 0, 0, .25);
       --glow-mid: rgba(0, 0, 0, .125);
       --on-text: #ffffff;
+      --ink-faint: rgba(0, 0, 0, .2);
+      --ink-hatch: rgba(0, 0, 0, .1);
       --dot: #d2d2d2;
-      --scrim: rgba(0, 0, 0, .32);
+      --veil: rgba(255, 255, 255, .6);
       --cell: 160px;
       --gap: 24px;
-      --panel-pad: 24px;
       --card-ease: cubic-bezier(.165, .84, .44, 1);
       --card-duration: 400ms;
     }
@@ -38,16 +37,16 @@
       :root {
         --bg: #121212;
         --text: #e4e4e4;
-        --muted: #7c7c7c;
-        --line: #262626;
         --ink-strong: rgba(255, 255, 255, .8);
         --ink-soft: rgba(255, 255, 255, .6);
         --edge: var(--edge-dark);
         --glow: var(--glow-dark);
         --glow-mid: var(--glow-mid-dark);
         --on-text: #121212;
+        --ink-faint: rgba(255, 255, 255, .2);
+        --ink-hatch: rgba(255, 255, 255, .1);
         --dot: #3a3a3a;
-        --scrim: rgba(0, 0, 0, .6);
+        --veil: rgba(18, 18, 18, .6);
         color-scheme: dark;
       }
     }
@@ -234,35 +233,94 @@
         opacity: 1;
       }
     }
-    .num {
-      font-size: 3rem;
-      font-weight: 600;
-      line-height: 1;
-      letter-spacing: -0.02em;
-      font-variant-numeric: tabular-nums;
-    }
-    .num-label {
-      font-size: 0.875rem;
-      color: var(--muted);
-      line-height: 1.35;
-      margin-top: 8px;
-    }
-    .nowrap {
-      white-space: nowrap;
-    }
-    .pill {
-      flex: none;
-      padding: 8px 18px;
+    /* Stat cards: a resting face, and on hover a blurred mask with the
+       details over it. The whole card is the button. */
+    .stat {
+      padding: 20px;
       border: 0;
-      border-radius: 999px;
-      background: var(--text);
-      color: var(--bg);
-      font-size: 0.875rem;
-      font-weight: 600;
+      border-radius: 32px;
+      background: none;
+      font-family: "IBM Plex Mono", monospace;
+      line-height: 1;
+      text-align: left;
       cursor: pointer;
     }
-    .pill:hover {
-      opacity: .85;
+    /* backdrop-filter only blurs what's painted behind it, so the face needs
+       an opaque ground to blur against. */
+    .stat .tile-surface {
+      background: var(--bg);
+    }
+    .stat-face,
+    .stat-mask {
+      position: absolute;
+      inset: 0;
+    }
+    .stat-num {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      translate: -50% -50%;
+      font-size: 1.5rem;
+      color: var(--ink-strong);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .stat-mark {
+      position: absolute;
+      top: calc(50% + 20px);
+      left: 50%;
+      translate: -50% 0;
+    }
+    .stat-mask {
+      background: rgba(0, 0, 0, .2);
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+    }
+    .stat-info {
+      flex: 1;
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: #ffffff;
+      font-size: 1rem;
+    }
+    .stat-head {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .stat-label {
+      flex: 1;
+      font-size: 0.75rem;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, .6);
+    }
+    .stat-title {
+      font-weight: 700;
+    }
+    /* With a mouse the details wait for hover or keyboard focus; touch
+       screens show them all the time. */
+    @media (hover: hover) {
+      .stat-mask,
+      .stat-info {
+        opacity: 0;
+        transition: opacity .2s ease-out;
+      }
+      .stat:hover .stat-mask,
+      .stat:hover .stat-info,
+      .stat:focus-visible .stat-mask,
+      .stat:focus-visible .stat-info {
+        opacity: 1;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .stat-mask,
+      .stat-info {
+        transition: none;
+      }
     }
     /* A photo inside .tile-surface stays put while the surface grows over it:
        it starts as large as the grown card and shrinks its inset in step. */
@@ -271,19 +329,9 @@
       inset: calc(-1 * var(--grow-y)) calc(-1 * var(--grow-x));
       background: center / cover no-repeat;
     }
-    .cafe {
-      color: #ffffff;
-    }
     .cafe .tile-media {
       background-color: #6b2c0d;
       background-image: url("assets/cafe.webp");
-    }
-    .cafe .num,
-    .cafe .num-label {
-      text-shadow: 0 1px 2px rgba(0, 0, 0, .45);
-    }
-    .cafe .num-label {
-      color: rgba(255, 255, 255, .85);
     }
 
     /* Tablet: profile above the same four-column grid */
@@ -328,16 +376,16 @@
       }
     }
 
-    /* Square dialogs */
+    /* Full-screen dialogs on a frosted veil in the page's own tone. They
+       close from the button in the top right corner (or Escape). */
     .modal {
       position: fixed;
       inset: 0;
       z-index: 20;
-      display: grid;
-      place-items: center;
-      box-sizing: border-box;
-      padding: 16px;
-      background: var(--scrim);
+      overflow: hidden;
+      background: var(--veil);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
       animation: fade .15s ease-out;
     }
     @keyframes fade {
@@ -349,172 +397,226 @@
     .modal[hidden] {
       display: none;
     }
-    .panel {
-      position: relative;
-      width: min(100%, 680px, calc(100dvh - 32px));
-      aspect-ratio: 1;
-      box-sizing: border-box;
-      overflow: hidden;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: var(--bg);
+    /* backdrop-filter makes .modal the containing block for fixed children,
+       so content scrolls in its own layer and the close button stays put. */
+    .modal-scroll {
+      position: absolute;
+      inset: 0;
+      overflow: auto;
+      overscroll-behavior: contain;
     }
-    @media (max-width: 560px) {
-      :root {
-        --panel-pad: 16px;
-      }
-    }
-    .icon-btn {
-      display: grid;
-      place-items: center;
-      flex: none;
-      width: 36px;
-      height: 36px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--bg);
-      font-size: 1rem;
-      line-height: 1;
-      cursor: pointer;
-    }
-    .icon-btn:hover:not(:disabled) {
-      border-color: var(--text);
-    }
-    .icon-btn:disabled {
-      opacity: .3;
-      cursor: default;
-    }
+    /* The 40px icon box puts the glyph's edges on the page's 48px gutter. */
     .close {
       position: absolute;
-      top: var(--panel-pad);
-      right: var(--panel-pad);
+      top: 40px;
+      right: 40px;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: none;
+      color: var(--ink-strong);
+      cursor: pointer;
+    }
+    .close::before {
+      content: "";
+      display: block;
+      width: 40px;
+      height: 40px;
+      background: currentColor;
+      -webkit-mask: url("assets/close.svg") center / 40px 40px no-repeat;
+      mask: url("assets/close.svg") center / 40px 40px no-repeat;
+    }
+    .close:hover {
+      color: var(--text);
     }
 
     /* Stay calendar */
-    .cal-panel {
+    .cal-page {
+      --hatch: repeating-linear-gradient(135deg, transparent 0 2px, var(--ink-hatch) 2px 3px, transparent 3px 5px);
+      --day: 72px;
+      --col-gap: calc(32px / 3);
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      padding: var(--panel-pad);
+      gap: 40px;
+      box-sizing: border-box;
+      max-width: calc(7 * var(--day) + 6 * var(--col-gap) + 64px);
+      margin: 0 auto;
+      padding: 80px 32px;
+    }
+    /* The legend shares the title's row, and drops below it when the row
+       runs out of room. */
+    .cal-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px 24px;
+    }
+    .cal-page h2 {
+      flex: 1 0 auto;
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--ink-strong);
     }
     .cal-head {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding-right: 44px;
+      gap: 40px;
     }
-    .cal-head h2 {
-      margin: 0 auto 0 0;
+    .cal-head h3 {
+      flex: 1;
+      margin: 0;
       font-size: 1.25rem;
       font-weight: 600;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--ink-strong);
     }
-    .cal {
-      flex: 1;
-      min-height: 0;
+    .cal-nav {
+      display: flex;
+      gap: 16px;
+    }
+    .nav-btn {
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      grid-template-rows: auto;
-      grid-auto-rows: 1fr;
-      gap: 4px;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border: 1px solid var(--ink-faint);
+      border-radius: 50%;
+      background: none;
+      color: var(--ink-strong);
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .nav-btn:hover:not(:disabled) {
+      border-color: var(--ink-strong);
+    }
+    .nav-btn:disabled {
+      opacity: .3;
+      cursor: default;
+    }
+    /* Sized so even a six-week month fits a 900px-tall screen. */
+    .cal {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 16px var(--col-gap);
     }
     .dow {
-      font-family: "IBM Plex Mono", monospace;
-      font-size: 0.75rem;
-      color: var(--muted);
-      text-align: center;
-      align-self: end;
-      padding-bottom: 4px;
+      display: grid;
+      place-items: center;
+      height: 40px;
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+      line-height: 1.5;
+      color: var(--ink-soft);
     }
     .day {
       position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 0;
-      border-radius: 6px;
-      font-size: 0.9375rem;
-      font-variant-numeric: tabular-nums;
-      color: var(--muted);
-      opacity: .4;
+      display: grid;
+      place-items: center;
+      aspect-ratio: 1;
+      box-sizing: border-box;
+      border-radius: 8px;
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+      line-height: 1.5;
+      color: var(--ink-faint);
     }
     .day.open {
-      background: var(--text);
+      border: 1px solid var(--ink-faint);
+      background: var(--ink-strong);
       color: var(--on-text);
-      font-weight: 600;
-      opacity: 1;
     }
     .day.booked {
-      background: repeating-linear-gradient(135deg, var(--line) 0 2px, transparent 2px 6px);
-      box-shadow: inset 0 0 0 1px var(--line);
+      border: 1px solid var(--ink-faint);
+      background: var(--hatch);
       text-decoration: line-through;
-      opacity: 1;
-    }
-    .day.past {
-      background: none;
-      box-shadow: none;
-      text-decoration: none;
-      opacity: .2;
     }
     .day.today::after {
       content: "";
       position: absolute;
       bottom: 12%;
+      left: 50%;
       width: 4px;
       height: 4px;
+      margin-left: -2px;
       border-radius: 50%;
       background: currentColor;
     }
     .legend {
       display: flex;
-      gap: 20px;
-      font-size: 0.8125rem;
-      color: var(--muted);
+      flex-wrap: wrap;
+      gap: 8px 24px;
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+      line-height: 1.5;
+      color: var(--ink-soft);
     }
     .legend span {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
     }
     .swatch {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border-radius: 3px;
+      width: 20px;
+      height: 20px;
+      box-sizing: border-box;
+      border: 1px solid var(--ink-faint);
+      border-radius: 4px;
     }
     .swatch.open {
-      background: var(--text);
+      background: var(--ink-strong);
     }
     .swatch.booked {
-      background: repeating-linear-gradient(135deg, var(--line) 0 2px, transparent 2px 5px);
-      box-shadow: inset 0 0 0 1px var(--line);
+      background: var(--hatch);
     }
 
-    /* Café map */
+    /* Café map: the 800-unit square holding the seven cities sits centered at
+       800px (narrower on phones), and the land runs on past it to the edges.
+       The map spans -1350..2151 × -720..1530 in those units. */
     .map {
-      display: block;
-      width: 100%;
-      height: 100%;
+      --core: min(800px, (100vw - 64px) * 800 / 670);
+      position: absolute;
+      left: calc(50% - var(--core) * 1750 / 800);
+      top: calc(50% - var(--core) * 1120 / 800);
+      width: calc(var(--core) * 3501 / 800);
+      height: calc(var(--core) * 2250 / 800);
     }
     .map .land {
-      color: var(--dot);
+      fill: var(--dot);
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 15px;
+      dominant-baseline: central;
     }
+    /* --k is map units per screen pixel, kept by script, so labels and dots
+       don't shrink past legibility on phones. */
     .map circle {
+      r: max(8px, 4px * var(--k, 1));
       fill: var(--text);
       stroke: var(--bg);
-      stroke-width: 4;
+      stroke-width: max(4px, 2px * var(--k, 1));
     }
-    .map text {
+    .map .city {
       fill: var(--text);
-      font-size: 22px;
+      font-size: max(22px, 13px * var(--k, 1));
       font-weight: 600;
+      dominant-baseline: central;
       paint-order: stroke;
       stroke: var(--bg);
-      stroke-width: 6px;
+      stroke-width: max(6px, 4px * var(--k, 1));
       stroke-linejoin: round;
     }
-    .map a:hover text,
-    .map a:focus-visible text {
+    .map a:hover .city,
+    .map a:focus-visible .city {
       text-decoration: underline;
     }
     .map a:focus-visible {
@@ -522,7 +624,43 @@
     }
     .map a:focus-visible circle {
       stroke: var(--text);
-      stroke-width: 2;
+    }
+
+    /* Phones: the home page's 32px side gutter and 48px bottom; the close
+       button moves in to sit on that gutter, and the calendar starts below
+       it. */
+    @media (max-width: 807px) {
+      .close {
+        top: 24px;
+        right: 24px;
+      }
+      .cal-page {
+        --col-gap: 4px;
+        gap: 32px;
+        padding: 88px 32px 48px;
+      }
+      .cal-head {
+        gap: 16px;
+      }
+      .cal-nav {
+        gap: 12px;
+      }
+      .cal {
+        row-gap: 8px;
+      }
+      .dow {
+        height: 32px;
+        font-size: 0.875rem;
+      }
+      .day {
+        border-radius: 6px;
+      }
+      .day.today::after {
+        bottom: 8%;
+        width: 3px;
+        height: 3px;
+        margin-left: -1.5px;
+      }
     }
   </style>
 </head>
@@ -538,24 +676,33 @@
     </header>
 
     <main class="grid">
-      <section class="tile stay" aria-label="中野居">
-        <div class="tile-surface"></div>
-        <div class="tile-edge"><div class="tile-glow"></div></div>
-        <div>
-          <div class="num" id="nights">–</div>
-          <div class="num-label">Nights hosted at <span class="nowrap">中野居</span></div>
-        </div>
-        <button class="pill" id="open-stay" type="button" aria-haspopup="dialog" aria-label="Stay! See open dates">Stay!</button>
-      </section>
-      <section class="tile tile-fill cafe" aria-label="Café maps">
-        <div class="tile-surface"><div class="tile-media"></div></div>
-        <div class="tile-edge"><div class="tile-glow"></div></div>
-        <div>
-          <div class="num" id="cafes">–</div>
-          <div class="num-label">Cafés visited</div>
-        </div>
-        <button class="pill" id="open-map" type="button" aria-haspopup="dialog" aria-label="Hop! Open café maps">Hop!</button>
-      </section>
+      <button class="tile stat stay" id="open-stay" type="button" aria-haspopup="dialog">
+        <span class="tile-surface">
+          <span class="stat-face" aria-hidden="true">
+            <span class="stat-num" data-nights>–</span>
+            <img class="stat-mark" src="assets/triangle-up.svg" width="12" height="8" alt="">
+          </span>
+          <span class="stat-mask"></span>
+        </span>
+        <span class="tile-edge"><span class="tile-glow"></span></span>
+        <span class="stat-info">
+          <span class="stat-head"><span class="stat-label">Have hosted</span><span aria-hidden="true">↗</span></span>
+          <strong class="stat-title"><span data-nights>–</span> Nights</strong>
+          <span>中野居</span>
+        </span>
+      </button>
+      <button class="tile tile-fill stat cafe" id="open-map" type="button" aria-haspopup="dialog">
+        <span class="tile-surface">
+          <span class="tile-media"></span>
+          <span class="stat-mask"></span>
+        </span>
+        <span class="tile-edge"><span class="tile-glow"></span></span>
+        <span class="stat-info">
+          <span class="stat-head"><span class="stat-label">Café hopping</span><span aria-hidden="true">↗</span></span>
+          <strong class="stat-title">7 Cities</strong>
+          <span><span id="cafes">–</span> Visited</span>
+        </span>
+      </button>
       <!-- Empty slots, kept by their slot letter until their cards are designed -->
       <div class="tile" style="grid-area: a" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
       <div class="tile" style="grid-area: c" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
@@ -568,29 +715,34 @@
     </main>
   </div>
 
-  <div class="modal" id="stay-modal" role="dialog" aria-modal="true" aria-label="Open dates at 中野居" hidden>
-    <div class="panel cal-panel">
-      <div class="cal-head">
-        <h2 id="cal-month"></h2>
-        <button class="icon-btn" id="prev" type="button" aria-label="Previous month">‹</button>
-        <button class="icon-btn" id="next" type="button" aria-label="Next month">›</button>
+  <div class="modal" id="stay-modal" role="dialog" aria-modal="true" aria-labelledby="stay-title" hidden>
+    <div class="modal-scroll">
+      <div class="cal-page">
+        <div class="cal-top">
+          <h2 id="stay-title">Check Availability at 中野居</h2>
+          <div class="legend">
+            <span><i class="swatch open"></i>Available</span>
+            <span><i class="swatch booked"></i>Booked</span>
+          </div>
+        </div>
+        <div class="cal-head">
+          <h3 id="cal-month" aria-live="polite"></h3>
+          <div class="cal-nav">
+            <button class="nav-btn" id="prev" type="button" aria-label="Previous month">←</button>
+            <button class="nav-btn" id="next" type="button" aria-label="Next month">→</button>
+          </div>
+        </div>
+        <div class="cal" id="cal"></div>
       </div>
-      <div class="cal" id="cal"></div>
-      <div class="legend">
-        <span><i class="swatch open"></i>Available</span>
-        <span><i class="swatch booked"></i>Booked</span>
-      </div>
-      <button class="icon-btn close" type="button" aria-label="Close">✕</button>
     </div>
+    <button class="close" type="button" aria-label="Close"></button>
   </div>
 
   <div class="modal" id="map-modal" role="dialog" aria-modal="true" aria-label="Café maps" hidden>
-    <div class="panel">
-      <svg class="map" id="map" viewBox="0 0 800 800" role="img" aria-label="Map of East and Southeast Asia with café map cities">
-        <use class="land" href="assets/asia-dots.svg#land"></use>
-      </svg>
-      <button class="icon-btn close" type="button" aria-label="Close">✕</button>
-    </div>
+    <svg class="map" id="map" viewBox="-1350 -720 3501 2250" role="group" aria-label="Map of Asia with café map cities">
+      <g class="land" id="land" aria-hidden="true"></g>
+    </svg>
+    <button class="close" type="button" aria-label="Close"></button>
   </div>
 
   <script>
@@ -604,7 +756,7 @@
     // Google Sheet published as CSV: one "key,value" pair per row.
     const SHEET_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRsjqEKd9H915_BJQxuPWgG66P3SRcIn9EWXcfqLX8eJt9Im_teGuY1PFzmJAnQ95DPx5Npa8nHpHq/pub?output=csv";
 
-    // Positions are in the 800×800 space of assets/asia-dots.svg.
+    // Positions are in map units: the 800×800 square the seven cities sit in.
     const CITIES = [
       { name: "Tokyo", x: 723.8, y: 186.1, side: "left", url: "https://maps.app.goo.gl/jXFLabRnFoQiWhTQ9" },
       { name: "Taipei", x: 440.1, y: 379.9, url: "https://maps.app.goo.gl/qVp1DhptNJtFrWtt9" },
@@ -651,7 +803,8 @@
         for (let d = start; d < end; d = addDays(d, 1)) target.add(key(d));
       }
       const todayKey = key(today);
-      document.getElementById("nights").textContent = [...booked].filter(k => k < todayKey).length;
+      const nights = [...booked].filter(k => k < todayKey).length;
+      for (const el of document.querySelectorAll("[data-nights]")) el.textContent = nights;
     }
 
     function stateOf(d) {
@@ -668,7 +821,7 @@
       const m = view.getMonth();
       const days = new Date(y, m + 1, 0).getDate();
       const lead = (view.getDay() + 6) % 7;
-      let html = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(d => `<div class="dow">${d}</div>`).join("");
+      let html = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(d => `<div class="dow" aria-hidden="true">${d}</div>`).join("");
       html += "<div></div>".repeat(lead);
       for (let i = 1; i <= days; i++) {
         const d = new Date(y, m, i);
@@ -676,8 +829,7 @@
         const today_ = +d === +today ? " today" : "";
         html += `<div class="day ${state}${today_}" aria-label="${MONTHS[m]} ${i}, ${state}">${i}</div>`;
       }
-      // Always six week rows so the square keeps the same proportions.
-      html += "<div></div>".repeat(42 - lead - days);
+      html += "<div></div>".repeat((7 - (lead + days) % 7) % 7);
       document.getElementById("cal").innerHTML = html;
       document.getElementById("cal-month").textContent = `${MONTHS[m]} ${y}`;
       document.getElementById("prev").disabled = view <= thisMonth;
@@ -710,17 +862,44 @@
       if (values.cafes_visited) document.getElementById("cafes").textContent = Number(values.cafes_visited).toLocaleString("en-US");
     }
 
+    // assets/asia-ascii.txt holds the land as text: one row per 9-unit cell
+    // row from y = -720, starting at x = -1350, spaces for sea. It is Natural
+    // Earth's 50m land sampled at cell centers on the same Mercator grid as
+    // CITIES; the glyph grades how much of the cell is land (. : +).
     const svgNS = "http://www.w3.org/2000/svg";
     const map = document.getElementById("map");
+    const MAP_X = -1350, MAP_Y = -720, CELL = 9;
+
+    async function loadLand() {
+      const res = await fetch("assets/asia-ascii.txt");
+      if (!res.ok) throw new Error(`Land ${res.status}`);
+      const rows = (await res.text()).split("\n");
+      const land = document.getElementById("land");
+      rows.forEach((row, i) => {
+        if (!row.trim()) return;
+        const text = document.createElementNS(svgNS, "text");
+        text.setAttribute("x", MAP_X);
+        text.setAttribute("y", MAP_Y + CELL * i + CELL / 2);
+        // Pin each row to the grid whatever monospace font draws it.
+        text.setAttribute("textLength", row.length * CELL);
+        text.setAttribute("lengthAdjust", "spacing");
+        text.textContent = row.replaceAll(" ", "\u00a0");
+        land.appendChild(text);
+      });
+    }
+
     for (const c of CITIES) {
       const left = c.side === "left";
       const a = document.createElementNS(svgNS, "a");
       a.setAttribute("href", c.url);
       a.setAttribute("target", "_blank");
       a.setAttribute("rel", "noopener");
-      a.innerHTML = `<circle cx="${c.x}" cy="${c.y}" r="8"></circle><text x="${left ? c.x - 16 : c.x + 16}" y="${c.y + 8}" text-anchor="${left ? "end" : "start"}">${c.name}</text>`;
+      a.innerHTML = `<circle cx="${c.x}" cy="${c.y}"></circle><text class="city" x="${left ? c.x - 16 : c.x + 16}" y="${c.y}" text-anchor="${left ? "end" : "start"}">${c.name}</text>`;
       map.appendChild(a);
     }
+    new ResizeObserver(([entry]) => {
+      map.style.setProperty("--k", 3501 / entry.contentRect.width);
+    }).observe(map);
 
     // Card hover
 
@@ -781,13 +960,11 @@
     const mapButton = document.getElementById("open-map");
     mapButton.onclick = () => openModal("map-modal", mapButton);
     for (const btn of document.querySelectorAll(".close")) btn.onclick = closeModals;
-    for (const modal of document.querySelectorAll(".modal")) {
-      modal.addEventListener("click", e => { if (e.target === modal) closeModals(); });
-    }
     document.addEventListener("keydown", e => { if (e.key === "Escape") closeModals(); });
 
     loadStays().catch(console.error);
     loadSheet().catch(console.error);
+    loadLand().catch(console.error);
   </script>
 </body>
 </html>

@@ -28,6 +28,7 @@
       --ink-hatch: rgba(0, 0, 0, .1);
       --dot: #d2d2d2;
       --veil: rgba(255, 255, 255, .6);
+      --accent: #ff3d00;
       --cell: 160px;
       --gap: 24px;
       --card-ease: cubic-bezier(.165, .84, .44, 1);
@@ -118,13 +119,14 @@
                               j j
        Each breakpoint places cards by name in its own template, so a card can
        move on one device without changing the markup order. Designed cards
-       take their own names: song (a), movie (b), stay (g), cafe (j). */
+       take their own names: song (a), movie (b), flight (c), photo (d),
+       stay (g), now (i), cafe (j). */
     .grid {
       display: grid;
       grid-template-areas:
-        "song movie d d"
-        "c c d d"
-        "e f h i"
+        "song movie photo photo"
+        "flight flight photo photo"
+        "e f h now"
         "e stay cafe cafe";
       grid-auto-columns: var(--cell);
       grid-auto-rows: var(--cell);
@@ -357,8 +359,158 @@
     }
     /* The cover or poster is set by script; a dark ground shows until then. */
     .song .tile-media,
-    .movie .tile-media {
+    .movie .tile-media,
+    .photo .tile-media {
       background-color: #2a2a2a;
+    }
+
+    /* Photo: one picture at random, its place shown on hover. Not a link. */
+    .photo {
+      grid-area: photo;
+      cursor: default;
+    }
+    .photo-info {
+      justify-content: flex-end;
+    }
+    /* Touch screens can't hover, so the place stays over a clear photo. */
+    @media (hover: none) {
+      .photo .stat-mask {
+        display: none;
+      }
+      .photo-info {
+        text-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+      }
+    }
+
+    /* Flight: the next trip as a route, the plane parked midway. On hover it
+       flies the track from one dot to the other, over and over. --p is the
+       plane's place along the track; the line breaks around it. */
+    @property --p {
+      syntax: "<percentage>";
+      inherits: true;
+      initial-value: 50%;
+    }
+    .flight {
+      grid-area: flight;
+      flex-direction: row;
+      align-items: center;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 1.5rem;
+      line-height: 1;
+      color: var(--ink-strong);
+    }
+    .flight-dot {
+      flex: none;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    .flight [data-from] {
+      margin-right: 13px;
+    }
+    .flight [data-to] {
+      margin-left: 13px;
+    }
+    .flight-track {
+      --line: var(--ink-soft);
+      --inset: 9px;
+      --hole: 21px;
+      position: relative;
+      flex: 1;
+      align-self: stretch;
+      background: linear-gradient(to right,
+        transparent var(--inset),
+        var(--line) var(--inset) calc(var(--p) - var(--hole)),
+        transparent calc(var(--p) - var(--hole)) calc(var(--p) + var(--hole)),
+        var(--line) calc(var(--p) + var(--hole)) calc(100% - var(--inset)),
+        transparent calc(100% - var(--inset))) center / 100% 1px no-repeat;
+    }
+    .flight-plane {
+      position: absolute;
+      top: 50%;
+      left: var(--p);
+      width: 24px;
+      height: 24px;
+      translate: -50% -50%;
+      background: currentColor;
+      -webkit-mask: url("assets/plane.svg") center / contain no-repeat;
+      mask: url("assets/plane.svg") center / contain no-repeat;
+    }
+    @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+      /* The negative delay starts the loop with the plane where it rests;
+         the plane fades in step as it nears the dots at either end. */
+      .flight:hover .flight-track {
+        animation: fly 5s linear -2.5s infinite;
+      }
+      .flight:hover .flight-plane {
+        animation: fly-fade 5s linear -2.5s infinite;
+      }
+    }
+    @keyframes fly {
+      from { --p: 0%; }
+      to { --p: 100%; }
+    }
+    @keyframes fly-fade {
+      0%, 100% { opacity: 0; }
+      10%, 90% { opacity: 1; }
+    }
+
+    /* Now: what's new for a friend I haven't seen in a year. The card
+       retypes its word on hover; click opens the update itself. */
+    .now {
+      grid-area: now;
+      justify-content: center;
+      align-items: center;
+      border: 0;
+      border-radius: 32px;
+      background: none;
+      cursor: pointer;
+    }
+    .now-mark {
+      display: flex;
+      align-items: center;
+      margin: 0;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 1.5rem;
+      font-weight: 400;
+      line-height: 1;
+      color: var(--ink-strong);
+      white-space: pre;
+    }
+    .now-slash {
+      color: var(--ink-soft);
+    }
+    .now-word {
+      display: inline-block;
+      width: 3ch;
+      overflow: hidden;
+    }
+    .now-caret {
+      width: 5px;
+      height: 22px;
+      margin-left: 8px;
+      background: var(--accent);
+    }
+    /* Sized for the whole word, so the slash holds still while it's typed. */
+    .now .now-mark {
+      width: calc(5ch + 13px);
+    }
+    @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+      .now:hover .now-word {
+        animation: type 3.5s infinite;
+      }
+      .now:hover .now-caret {
+        animation: blink 1s steps(1) infinite;
+      }
+    }
+    /* Type the three letters in .7s, hold, then clear and start over. */
+    @keyframes type {
+      0% { width: 0; animation-timing-function: steps(3, end); }
+      20%, 100% { width: 3ch; }
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
     }
 
     /* Tablet: profile above the same four-column grid */
@@ -393,12 +545,12 @@
         --cell: calc((100cqi - var(--gap)) / 2);
         grid-template-areas:
           "song movie"
-          "c c"
-          "d d"
-          "d d"
+          "flight flight"
+          "photo photo"
+          "photo photo"
           "e f"
           "e stay"
-          "h i"
+          "h now"
           "cafe cafe";
       }
     }
@@ -607,6 +759,53 @@
       background: var(--hatch);
     }
 
+    /* Now page: the mark at the top, the update in the middle and its age at
+       the foot, in a column whose left edge lines up with the design's. */
+    .now-page {
+      display: flex;
+      flex-direction: column;
+      gap: 48px;
+      box-sizing: border-box;
+      min-height: 100%;
+      max-width: calc(740px + 64px);
+      margin: 0 auto;
+      padding: 80px 32px;
+    }
+    .now-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .now-body p {
+      margin: 0;
+      font-size: 1.125rem;
+      line-height: 30px;
+      color: var(--ink-soft);
+    }
+    .now-body .now-lead {
+      margin-bottom: 36px;
+      font-size: 1.75rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.4;
+      color: var(--ink-strong);
+    }
+    .now-foot {
+      margin: 0;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      color: var(--ink-faint);
+    }
+    .now-foot a {
+      color: inherit;
+      text-underline-offset: 3px;
+    }
+    .now-foot a:hover {
+      color: var(--ink-soft);
+    }
+
     /* Café map: the 800-unit square holding the seven cities sits centered at
        800px (narrower on phones), and the land runs on past it to the edges.
        The map spans -1350..2151 × -720..1530 in those units. */
@@ -710,7 +909,7 @@
         </span>
         <span class="tile-edge"><span class="tile-glow"></span></span>
         <span class="stat-info">
-          <span class="stat-head"><span class="stat-label">Recently Liked</span><span aria-hidden="true">↗</span></span>
+          <span class="stat-head"><span class="stat-label">Recently Liked</span></span>
           <strong class="stat-title clamp" data-title></strong>
           <span class="clamp" data-sub></span>
         </span>
@@ -722,11 +921,31 @@
         </span>
         <span class="tile-edge"><span class="tile-glow"></span></span>
         <span class="stat-info">
-          <span class="stat-head"><span class="stat-label">Recently Viewed</span><span aria-hidden="true">↗</span></span>
+          <span class="stat-head"><span class="stat-label">Recently Viewed</span></span>
           <strong class="stat-title clamp" data-title></strong>
           <span class="clamp" data-sub></span>
         </span>
       </a>
+      <div class="tile tile-fill stat photo" id="photo" role="img" aria-label="Photo">
+        <span class="tile-surface">
+          <span class="tile-media"></span>
+          <span class="stat-mask"></span>
+        </span>
+        <span class="tile-edge"><span class="tile-glow"></span></span>
+        <span class="stat-info photo-info" data-place></span>
+      </div>
+      <div class="tile flight" id="flight" role="img" aria-label="Next flight">
+        <span class="tile-edge"><span class="tile-glow"></span></span>
+        <span data-from>–––</span>
+        <i class="flight-dot"></i>
+        <span class="flight-track"><i class="flight-plane"></i></span>
+        <i class="flight-dot"></i>
+        <span data-to>–––</span>
+      </div>
+      <button class="tile now" id="open-now" type="button" aria-haspopup="dialog" aria-label="Now: what I'm up to">
+        <span class="tile-edge"><span class="tile-glow"></span></span>
+        <span class="now-mark" aria-hidden="true"><span class="now-slash">/ </span><span class="now-word">now</span><span class="now-caret"></span></span>
+      </button>
       <button class="tile stat stay" id="open-stay" type="button" aria-haspopup="dialog">
         <span class="tile-surface">
           <span class="stat-face" aria-hidden="true">
@@ -737,7 +956,7 @@
         </span>
         <span class="tile-edge"><span class="tile-glow"></span></span>
         <span class="stat-info">
-          <span class="stat-head"><span class="stat-label">Have hosted</span><span aria-hidden="true">↗</span></span>
+          <span class="stat-head"><span class="stat-label">Have hosted</span></span>
           <strong class="stat-title"><span data-nights>–</span> Nights</strong>
           <span>中野居</span>
         </span>
@@ -749,18 +968,15 @@
         </span>
         <span class="tile-edge"><span class="tile-glow"></span></span>
         <span class="stat-info">
-          <span class="stat-head"><span class="stat-label">Café hopping</span><span aria-hidden="true">↗</span></span>
+          <span class="stat-head"><span class="stat-label">Café hopping</span></span>
           <strong class="stat-title">7 Cities</strong>
           <span><span id="cafes">–</span> Visited</span>
         </span>
       </button>
       <!-- Empty slots, kept by their slot letter until their cards are designed -->
-      <div class="tile" style="grid-area: c" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
-      <div class="tile" style="grid-area: d" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
       <div class="tile" style="grid-area: e" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
       <div class="tile" style="grid-area: f" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
       <div class="tile" style="grid-area: h" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
-      <div class="tile" style="grid-area: i" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
     </main>
   </div>
 
@@ -791,6 +1007,21 @@
     <svg class="map" id="map" viewBox="-1350 -720 3501 2250" role="group" aria-label="Map of Asia with café map cities">
       <g class="land" id="land" aria-hidden="true"></g>
     </svg>
+    <button class="close" type="button" aria-label="Close"></button>
+  </div>
+
+  <div class="modal" id="now-modal" role="dialog" aria-modal="true" aria-labelledby="now-title" hidden>
+    <div class="modal-scroll">
+      <div class="now-page">
+        <h2 class="now-mark" id="now-title" aria-label="Now"><span class="now-slash">/ </span>now<span class="now-caret"></span></h2>
+        <div class="now-body">
+          <p class="now-lead" lang="zh-Hant" data-now="zh"></p>
+          <p lang="en" data-now="en"></p>
+          <p lang="ja" data-now="ja"></p>
+        </div>
+        <p class="now-foot"><span id="now-age"></span> <a href="https://nownownow.com/about" target="_blank" rel="noopener">What is this?</a></p>
+      </div>
+    </div>
     <button class="close" type="button" aria-label="Close"></button>
   </div>
 
@@ -898,17 +1129,52 @@
       renderCalendar();
     };
 
-    // Cafés
+    // Sheet values: cafés, the next flight and the now page
 
+    // Rows used: cafes_visited; flight_from, flight_to (airport codes);
+    // now_zh, now_en, now_ja (one line each) and now_updated (YYYY-MM-DD).
+    // A value holding a comma or quote comes quoted, its quotes doubled.
     async function loadSheet() {
       const res = await fetch(SHEET_CSV);
       if (!res.ok) throw new Error(`Sheet ${res.status}`);
       const values = {};
       for (const line of (await res.text()).split(/\r?\n/)) {
         const i = line.indexOf(",");
-        if (i > 0) values[line.slice(0, i).trim()] = line.slice(i + 1).trim().replace(/^"|"$/g, "");
+        if (i > 0) values[line.slice(0, i).trim()] = line.slice(i + 1).trim().replace(/^"|"$/g, "").replaceAll('""', '"');
       }
       if (values.cafes_visited) document.getElementById("cafes").textContent = Number(values.cafes_visited).toLocaleString("en-US");
+
+      const flight = document.getElementById("flight");
+      const { flight_from: from, flight_to: to } = values;
+      if (from && to) {
+        flight.querySelector("[data-from]").textContent = from;
+        flight.querySelector("[data-to]").textContent = to;
+        flight.setAttribute("aria-label", `Next flight: ${from} to ${to}`);
+      }
+
+      for (const el of document.querySelectorAll("[data-now]")) el.textContent = values[`now_${el.dataset.now}`] || "";
+      if (/^\d{4}-\d{2}-\d{2}$/.test(values.now_updated)) {
+        const days = Math.max(0, Math.round((today - parseDate(values.now_updated)) / 864e5));
+        document.getElementById("now-age").textContent =
+          days === 0 ? "Updated today." : `Updated ${days} day${days === 1 ? "" : "s"} ago.`;
+      }
+    }
+
+    // Photos
+
+    // assets/photos.json lists the pictures in assets/photos/ as
+    // { "file": "name.webp", "place": "City, Country" }; the update-photos
+    // workflow writes it from the file names. Each visit shows one.
+    async function loadPhoto() {
+      const res = await fetch("assets/photos.json");
+      if (!res.ok) throw new Error(`Photos ${res.status}`);
+      const list = await res.json();
+      if (!list.length) return;
+      const { file, place } = list[Math.floor(Math.random() * list.length)];
+      const card = document.getElementById("photo");
+      card.querySelector(".tile-media").style.backgroundImage = `url("assets/photos/${encodeURIComponent(file)}")`;
+      card.querySelector("[data-place]").textContent = place;
+      card.setAttribute("aria-label", `Photo taken in ${place}`);
     }
 
     // Song and movie picks
@@ -1026,12 +1292,15 @@
     };
     const mapButton = document.getElementById("open-map");
     mapButton.onclick = () => openModal("map-modal", mapButton);
+    const nowButton = document.getElementById("open-now");
+    nowButton.onclick = () => openModal("now-modal", nowButton);
     for (const btn of document.querySelectorAll(".close")) btn.onclick = closeModals;
     document.addEventListener("keydown", e => { if (e.key === "Escape") closeModals(); });
 
     loadStays().catch(console.error);
     loadSheet().catch(console.error);
     loadLand().catch(console.error);
+    loadPhoto().catch(console.error);
     loadPick("assets/songs.json", "song", s => ({
       url: s.url, image: s.cover, title: s.title, sub: s.artist,
       label: `${s.title} by ${s.artist}, on Spotify`,

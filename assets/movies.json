@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "title": "Chungking Express",
+    "rating": 8,
+    "url": "https://www.imdb.com/title/tt0109424/",
+    "poster": "https://image.tmdb.org/t/p/w500/43I9DcNoCzpyzK8JCkJYpHqHqGG.jpg"
+  },
+  {
+    "title": "Don't Look Up",
+    "rating": 4,
+    "url": "https://www.imdb.com/title/tt11286314/",
+    "poster": "https://image.tmdb.org/t/p/w500/th4E1yqsE8DGpAseLiUrI60Hf8V.jpg"
+  },
+  {
+    "title": "Inception",
+    "rating": 10,
+    "url": "https://www.imdb.com/title/tt1375666/",
+    "poster": "https://image.tmdb.org/t/p/w500/xlaY2zyzMfkhk0HSC5VUwzoZPU1.jpg"
+  },
+  {
+    "title": "Chiikawa the Movie: The Secret of Mermaid Island",
+    "rating": 8,
+    "url": "https://www.imdb.com/title/tt39026173/",
+    "poster": "https://image.tmdb.org/t/p/w500/2sapvk8OG1rmaS2PquLnfyoMvOS.jpg"
+  },
+  {
+    "title": "Tokyo Godfathers",
+    "rating": 10,
+    "url": "https://www.imdb.com/title/tt0388473/",
+    "poster": "https://image.tmdb.org/t/p/w500/sPC66btzQlzuRdPKiSDYZ5Hvxgc.jpg"
+  }
+]

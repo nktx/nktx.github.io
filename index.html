@@ -405,6 +405,31 @@
       line-height: 1;
       color: var(--ink-strong);
     }
+    /* The label sits in the corner, where the stat cards keep theirs; like
+       their details, it waits for hover where there is one. */
+    .flight-label {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 0.75rem;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+    }
+    @media (hover: hover) {
+      .flight-label {
+        opacity: 0;
+        transition: opacity .2s ease-out;
+      }
+      .flight:hover .flight-label {
+        opacity: 1;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .flight-label {
+        transition: none;
+      }
+    }
     .flight-dot {
       flex: none;
       width: 7px;
@@ -1111,7 +1136,7 @@
         </span>
         <span class="tile-edge"><span class="tile-glow"></span></span>
         <span class="stat-info">
-          <span class="stat-head"><span class="stat-label">Recently Viewed</span></span>
+          <span class="stat-head"><span class="stat-label">Recently Rated</span></span>
           <strong class="stat-title clamp" data-title></strong>
           <span class="clamp" data-sub></span>
         </span>
@@ -1126,6 +1151,7 @@
       </div>
       <div class="tile flight" id="flight" role="img" aria-label="Next flight">
         <span class="tile-edge"><span class="tile-glow"></span></span>
+        <span class="flight-label" aria-hidden="true">Next Flight</span>
         <span data-from>–––</span>
         <i class="flight-dot"></i>
         <span class="flight-track"><i class="flight-plane"></i></span>
@@ -1146,7 +1172,7 @@
         </span>
         <span class="tile-edge"><span class="tile-glow"></span></span>
         <span class="stat-info">
-          <span class="stat-head"><span class="stat-label">Have hosted</span></span>
+          <span class="stat-head"><span class="stat-label">Nights Hosted</span></span>
           <strong class="stat-title"><span data-nights>–</span> Nights</strong>
           <span>中野居</span>
         </span>
@@ -1451,8 +1477,15 @@
         return li;
       }));
 
+      // The card holds four glyphs at most; with more links it drops four
+      // picked at random, in a fresh order each visit. The list keeps them all.
+      const picks = [...links];
+      for (let i = picks.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [picks[i], picks[j]] = [picks[j], picks[i]];
+      }
       // A glyph is the first character of its column, or of the name.
-      const glyphs = links.map(l => [...(l.glyph || l.name)][0]);
+      const glyphs = (links.length > 4 ? picks.slice(0, 4) : links).map(l => [...(l.glyph || l.name)][0]);
       // Load only the CJK letters in use, as Plex Mono has none.
       const cjk = [...new Set(glyphs.filter(g => /[^\x00-ɏ]/.test(g)))].join("");
       if (cjk) {

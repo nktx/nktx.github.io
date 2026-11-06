@@ -544,14 +544,15 @@
       50% { opacity: 0; }
     }
 
-    /* Place: where I am, a gray Tokyo map with a pulsing dot. On hover the
+    /* Place: where I am, Tokyo as land and water only (the bay, the Sumida
+       and the Arakawa), Tokyo Station under the pulsing dot. On hover the
        map blurs and names the current sprint; the dot stays on top. */
     .place {
       grid-area: place;
       cursor: default;
     }
     .place .tile-media {
-      background-color: #e6e6e6;
+      background-color: #ececec;
       background-image: url("assets/tokyo.jpg");
     }
     @media (prefers-color-scheme: dark) {

@@ -1,0 +1,49 @@
+# Prepares photos uploaded to assets/photos/ for the homepage's photo card:
+# shrinks them to webp and rebuilds assets/photos.json from their names
+# (scripts/update-photos.mjs). Commits only when something changed.
+name: Update photos
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - assets/photos/**
+      - scripts/update-photos.mjs
+      - .github/workflows/update-photos.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-photos
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Install sharp
+        run: npm install --no-save --no-package-lock sharp@0.34
+
+      - name: Photos
+        run: node scripts/update-photos.mjs
+
+      - name: Commit
+        run: |
+          git add -A assets/photos assets/photos.json
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update photos"
+          git pull --rebase
+          git push

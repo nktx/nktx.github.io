@@ -118,16 +118,16 @@
                               h i
                               j j
        Each breakpoint places cards by name in its own template, so a card can
-       move on one device without changing the markup order. Designed cards
-       take their own names: song (a), movie (b), flight (c), photo (d),
-       stay (g), now (i), cafe (j). */
+       move on one device without changing the markup order. Cards take their
+       own names: song (a), movie (b), flight (c), photo (d), links (e),
+       skate (f), stay (g), place (h), now (i), cafe (j). */
     .grid {
       display: grid;
       grid-template-areas:
         "song movie photo photo"
         "flight flight photo photo"
-        "e f h now"
-        "e stay cafe cafe";
+        "links skate place now"
+        "links stay cafe cafe";
       grid-auto-columns: var(--cell);
       grid-auto-rows: var(--cell);
       gap: var(--gap);
@@ -180,7 +180,8 @@
     /* Figma radius 32 with 60% corner smoothing, as 9-slice masks; the smoothed
        corner spans 51.2px, inside the 52px slice. */
     @supports (-webkit-mask-box-image: none) {
-      .tile-surface {
+      .tile-surface,
+      .links-stage {
         -webkit-mask-box-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath fill-rule='evenodd' d='M68.8 0c17.922 0 26.883 0 33.728 3.488a32 32 0 0 1 13.985 13.985c3.488 6.845 3.488 15.806 3.488 33.728L120 68.8c0 17.922 0 26.883 -3.488 33.728a32 32 0 0 1 -13.985 13.985c-6.845 3.488 -15.806 3.488 -33.728 3.488L51.2 120c-17.922 0 -26.883 0 -33.728 -3.488a32 32 0 0 1 -13.985 -13.985c-3.488 -6.845 -3.488 -15.806 -3.488 -33.728L0 51.2c0 -17.922 0 -26.883 3.488 -33.728a32 32 0 0 1 13.985 -13.985c6.845 -3.488 15.806 -3.488 33.728 -3.488Z'/%3E%3C/svg%3E") 52 fill / 52px;
       }
       .tile-edge {
@@ -188,7 +189,8 @@
       }
     }
     @supports not (-webkit-mask-box-image: none) {
-      .tile-surface {
+      .tile-surface,
+      .links-stage {
         border-radius: 32px;
       }
       .tile-edge {
@@ -221,15 +223,18 @@
       background: radial-gradient(circle, var(--glow), var(--glow-mid) 33%, transparent 66%);
     }
     /* Hover grows the card's surface and edge outward by --grow-x/y (set from
-       its size by script) instead of scaling, so the content stays crisp. */
+       its size by script) instead of scaling, so the content stays crisp.
+       The links card is the exception: only its arrow button wakes it. */
     @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
       .tile-surface,
       .tile-edge,
       .tile-media {
         transition: inset var(--card-duration) var(--card-ease);
       }
-      .tile:hover .tile-surface,
-      .tile:hover .tile-edge {
+      .tile:not(.links):hover .tile-surface,
+      .tile:not(.links):hover .tile-edge,
+      .links:has(.links-open:hover) .tile-surface,
+      .links:has(.links-open:hover) .tile-edge {
         inset: calc(-1 * var(--grow-y)) calc(-1 * var(--grow-x));
       }
       .tile:hover .tile-media {
@@ -238,7 +243,8 @@
       .tile-glow {
         transition: opacity .25s linear, transform 1s cubic-bezier(.16, 1, .3, 1);
       }
-      .tile:hover .tile-glow {
+      .tile:not(.links):hover .tile-glow,
+      .links:has(.links-open:hover) .tile-glow {
         opacity: 1;
       }
     }
@@ -513,6 +519,144 @@
       50% { opacity: 0; }
     }
 
+    /* Place: where I am, a gray Tokyo map with a pulsing dot. On hover the
+       map blurs and names the current sprint; the dot stays on top. */
+    .place {
+      grid-area: place;
+      cursor: default;
+    }
+    .place .tile-media {
+      background-color: #e6e6e6;
+      background-image: url("assets/tokyo.jpg");
+    }
+    @media (prefers-color-scheme: dark) {
+      .place .tile-media {
+        filter: invert(.9);
+      }
+    }
+    .place-dot {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 12px;
+      height: 12px;
+      margin: -6px;
+      pointer-events: none;
+    }
+    .place-dot::after,
+    .place-dot i {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+    }
+    .place-dot::after {
+      background: var(--accent);
+    }
+    /* Two white rings spread out from the dot and fade, half a beat apart. */
+    .place-dot i {
+      background: #ffffff;
+      opacity: 0;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .place-dot i {
+        animation: ping 2.4s cubic-bezier(0, 0, .2, 1) infinite;
+      }
+      .place-dot i + i {
+        animation-delay: -1.2s;
+      }
+    }
+    @keyframes ping {
+      from { transform: scale(1); opacity: .9; }
+      to { transform: scale(5); opacity: 0; }
+    }
+    @media (hover: hover) {
+      .place:hover .place-dot i {
+        visibility: hidden;
+      }
+    }
+
+    /* Skate: a short clip on loop; hover blurs and pauses it. */
+    .skate {
+      grid-area: skate;
+      cursor: default;
+    }
+    .skate .tile-media {
+      background-color: #6a6a6a;
+      background-image: url("assets/skate.jpg");
+    }
+    .skate video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    /* Touch screens can't hover, so the clip just plays, unblurred. */
+    @media (hover: none) {
+      .skate .stat-mask {
+        display: none;
+      }
+    }
+
+    /* Links: one outlined glyph per link, piled up by a small physics world
+       on the inverted ground; they can be dragged and thrown. The arrow opens
+       the list itself. */
+    .links {
+      --links-ink: color-mix(in srgb, var(--bg) 80%, transparent);
+      grid-area: links;
+    }
+    .links .tile-surface {
+      background: var(--text);
+    }
+    .links-stage {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .links-glyph {
+      position: absolute;
+      top: 0;
+      left: 0;
+      font-family: "IBM Plex Mono", "IBM Plex Sans JP", monospace;
+      font-size: calc(var(--cell) * .72);
+      line-height: 1;
+      color: transparent;
+      -webkit-text-stroke: 1px var(--links-ink);
+      white-space: pre;
+      visibility: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      pointer-events: auto;
+      cursor: grab;
+    }
+    .links-glyph.dragging {
+      cursor: grabbing;
+    }
+    .links-open {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+      transition: background .2s ease-out, color .2s ease-out;
+    }
+    .links-open:hover,
+    .links-open:focus-visible {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
     /* Tablet: profile above the same four-column grid */
     @media (max-width: 1279px) {
       .page {
@@ -548,9 +692,9 @@
           "flight flight"
           "photo photo"
           "photo photo"
-          "e f"
-          "e stay"
-          "h now"
+          "links skate"
+          "links stay"
+          "place now"
           "cafe cafe";
       }
     }
@@ -806,6 +950,52 @@
       color: var(--ink-soft);
     }
 
+    /* Links page: the list in the same centered column as the now page. */
+    .links-page {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      box-sizing: border-box;
+      min-height: 100%;
+      max-width: calc(740px + 64px);
+      margin: 0 auto;
+      padding: 80px 32px;
+    }
+    .links-list {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .links-list a {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: var(--ink-strong);
+      text-decoration: none;
+    }
+    .links-list a::after {
+      content: "→";
+      font-size: .75em;
+      color: var(--accent);
+      transition: translate .2s ease-out;
+    }
+    .links-list a:hover,
+    .links-list a:focus-visible {
+      color: var(--text);
+    }
+    .links-list a:hover::after,
+    .links-list a:focus-visible::after {
+      translate: 4px 0;
+    }
+
     /* Café map: the 800-unit square holding the seven cities sits centered at
        800px (narrower on phones), and the land runs on past it to the edges.
        The map spans -1350..2151 × -720..1530 in those units. */
@@ -973,10 +1163,34 @@
           <span><span id="cafes">–</span> Visited</span>
         </span>
       </button>
-      <!-- Empty slots, kept by their slot letter until their cards are designed -->
-      <div class="tile" style="grid-area: e" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
-      <div class="tile" style="grid-area: f" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
-      <div class="tile" style="grid-area: h" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
+      <div class="tile tile-fill links" id="links">
+        <span class="tile-surface"></span>
+        <span class="tile-edge"><span class="tile-glow"></span></span>
+        <span class="links-stage" aria-hidden="true"></span>
+        <button class="links-open" id="open-links" type="button" aria-haspopup="dialog" aria-label="Links">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2.5 9.5l7-7M3.5 2.5h6v6"/></svg>
+        </button>
+      </div>
+      <div class="tile tile-fill stat skate" id="skate" role="img" aria-label="Video: my shadow on a skateboard down a Tokyo side street">
+        <span class="tile-surface">
+          <span class="tile-media"><video src="assets/skate.mp4" poster="assets/skate.jpg" muted loop playsinline preload="auto" disablepictureinpicture></video></span>
+          <span class="stat-mask"></span>
+        </span>
+        <span class="tile-edge"><span class="tile-glow"></span></span>
+      </div>
+      <div class="tile tile-fill stat place" id="place" role="img" aria-label="Map of Tokyo">
+        <span class="tile-surface">
+          <span class="tile-media" title="Map: 国土地理院"></span>
+          <span class="stat-mask"></span>
+        </span>
+        <span class="tile-edge"><span class="tile-glow"></span></span>
+        <span class="stat-info">
+          <span class="stat-head"><span class="stat-label" lang="ja">東京 スプリントズ</span></span>
+          <strong class="stat-title" data-sprint-no></strong>
+          <span lang="ja" data-sprint-name></span>
+        </span>
+        <span class="place-dot"><i></i><i></i></span>
+      </div>
     </main>
   </div>
 
@@ -1025,6 +1239,17 @@
     <button class="close" type="button" aria-label="Close"></button>
   </div>
 
+  <div class="modal" id="links-modal" role="dialog" aria-modal="true" aria-label="Links" hidden>
+    <div class="modal-scroll">
+      <nav class="links-page">
+        <ul class="links-list" id="links-list"></ul>
+      </nav>
+    </div>
+    <button class="close" type="button" aria-label="Close"></button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
+
   <script>
     // Google Calendar with all-day events titled "Available" or "Booked".
     // End dates are exclusive; each Booked day counts as one night.
@@ -1033,8 +1258,18 @@
     const CALENDAR_ID = "26b88782a2137f79c9e5524e18717048eb45a5017b4c2f98f12e9776b28305db@group.calendar.google.com";
     const CALENDAR_API_KEY = "AIzaSyDWvU8CqmbO30ni7Q6lR0QZFv4s2xD6V9k";
 
-    // Google Sheet published as CSV: one "key,value" pair per row.
-    const SHEET_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRsjqEKd9H915_BJQxuPWgG66P3SRcIn9EWXcfqLX8eJt9Im_teGuY1PFzmJAnQ95DPx5Npa8nHpHq/pub?output=csv";
+    // Google Sheet published as CSV. Its first tab holds one "key,value" pair
+    // per row. The links tab holds glyph, name and url columns under a header
+    // row; LINKS_GID is that tab's gid (the number after #gid= in its URL).
+    // Until it is set, the card shows DEFAULT_LINKS.
+    const SHEET = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRsjqEKd9H915_BJQxuPWgG66P3SRcIn9EWXcfqLX8eJt9Im_teGuY1PFzmJAnQ95DPx5Npa8nHpHq/pub";
+    const SHEET_CSV = `${SHEET}?output=csv`;
+    const LINKS_GID = "786628846";
+    const DEFAULT_LINKS = [
+      { glyph: "I", name: "Instagram @nktx", url: "https://www.instagram.com/nktx/" },
+      { glyph: "虎", name: "虎林街碎碎念", url: "https://nktx.substack.com/" },
+      { glyph: "4", name: "46610", url: "https://medium.com/46610/" },
+    ];
 
     // Positions are in map units: the 800×800 square the seven cities sit in.
     const CITIES = [
@@ -1129,19 +1364,43 @@
       renderCalendar();
     };
 
-    // Sheet values: cafés, the next flight and the now page
+    // Sheet values: cafés, the next flight, the now page and the sprint
+
+    // Rows of fields. A field holding a comma, quote or line break comes
+    // quoted, its quotes doubled.
+    function parseCSV(text) {
+      const rows = [];
+      let row = [], field = "", quoted = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (quoted) {
+          if (c !== '"') field += c;
+          else if (text[i + 1] === '"') field += c, i++;
+          else quoted = false;
+        } else if (c === '"') quoted = true;
+        else if (c === ",") row.push(field), field = "";
+        else if (c === "\n" || c === "\r") {
+          if (c === "\r" && text[i + 1] === "\n") i++;
+          row.push(field), rows.push(row);
+          row = [], field = "";
+        } else field += c;
+      }
+      if (field || row.length) row.push(field), rows.push(row);
+      return rows.map(r => r.map(f => f.trim()));
+    }
+
+    async function fetchCSV(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Sheet ${res.status}`);
+      return parseCSV(await res.text());
+    }
 
     // Rows used: cafes_visited; flight_from, flight_to (airport codes);
-    // now_zh, now_en, now_ja (one line each) and now_updated (YYYY-MM-DD).
-    // A value holding a comma or quote comes quoted, its quotes doubled.
+    // now_zh, now_en, now_ja (one line each) and now_updated (YYYY-MM-DD);
+    // sprint_no (a number) and sprint_name.
     async function loadSheet() {
-      const res = await fetch(SHEET_CSV);
-      if (!res.ok) throw new Error(`Sheet ${res.status}`);
       const values = {};
-      for (const line of (await res.text()).split(/\r?\n/)) {
-        const i = line.indexOf(",");
-        if (i > 0) values[line.slice(0, i).trim()] = line.slice(i + 1).trim().replace(/^"|"$/g, "").replaceAll('""', '"');
-      }
+      for (const [k, v = ""] of await fetchCSV(SHEET_CSV)) if (k) values[k] = v;
       if (values.cafes_visited) document.getElementById("cafes").textContent = Number(values.cafes_visited).toLocaleString("en-US");
 
       const flight = document.getElementById("flight");
@@ -1158,6 +1417,208 @@
         document.getElementById("now-age").textContent =
           days === 0 ? "Updated today." : `Updated ${days} day${days === 1 ? "" : "s"} ago.`;
       }
+
+      const { sprint_no: no, sprint_name: name = "" } = values;
+      if (no) {
+        const place = document.getElementById("place");
+        place.querySelector("[data-sprint-no]").textContent = `#${no}`;
+        place.querySelector("[data-sprint-name]").textContent = name;
+        place.setAttribute("aria-label", `Map of Tokyo. Tokyo Sprints #${no}${name ? `: ${name}` : ""}`);
+      }
+    }
+
+    // Links
+
+    // One outlined glyph per link drops into the card and piles up; each can
+    // be dragged and thrown. The arrow opens the full list.
+    async function loadLinks() {
+      let links = DEFAULT_LINKS;
+      if (LINKS_GID) {
+        const rows = (await fetchCSV(`${SHEET}?gid=${LINKS_GID}&single=true&output=csv`)).slice(1);
+        links = rows.map(([glyph = "", name = "", url = ""]) => ({ glyph, name, url }));
+      }
+      links = links.filter(l => l.name && /^https:\/\//.test(l.url));
+
+      const list = document.getElementById("links-list");
+      list.replaceChildren(...links.map(({ name, url }) => {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = name;
+        li.append(a);
+        return li;
+      }));
+
+      // A glyph is the first character of its column, or of the name.
+      const glyphs = links.map(l => [...(l.glyph || l.name)][0]);
+      // Load only the CJK letters in use, as Plex Mono has none.
+      const cjk = [...new Set(glyphs.filter(g => /[^\x00-ɏ]/.test(g)))].join("");
+      if (cjk) {
+        const font = document.createElement("link");
+        font.rel = "stylesheet";
+        font.href = `https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP&display=block&text=${encodeURIComponent(cjk)}`;
+        document.head.append(font);
+        await new Promise(r => { font.onload = font.onerror = r; });
+      }
+      await Promise.all([
+        document.fonts.load(`16px "IBM Plex Mono"`),
+        cjk && document.fonts.load(`16px "IBM Plex Sans JP"`, cjk),
+      ]).catch(() => {});
+      if (window.Matter) startPile(glyphs);
+    }
+
+    function startPile(glyphs) {
+      const { Engine, Bodies, Body, Composite, Constraint, Query, Sleeping } = Matter;
+      const card = document.getElementById("links");
+      const stage = card.querySelector(".links-stage");
+      const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const engine = Engine.create({ enableSleeping: true });
+      engine.gravity.y = 1.2;
+      const STEP = 1000 / 60;
+
+      const spans = glyphs.map(g => {
+        const span = document.createElement("span");
+        span.className = "links-glyph";
+        span.textContent = g;
+        stage.append(span);
+        return span;
+      });
+      let bodies = [];
+      let walls = [];
+      let size = null;
+
+      // (Re)build the world for the card's current size: walls on all four
+      // sides, and the glyphs dropped from the top, a little apart.
+      function build(w, h) {
+        Composite.clear(engine.world, false);
+        const t = 200;
+        walls = [
+          Bodies.rectangle(w / 2, h + t / 2, w + 2 * t, t),
+          Bodies.rectangle(w / 2, -t / 2, w + 2 * t, t),
+          Bodies.rectangle(-t / 2, h / 2, t, h + 2 * t),
+          Bodies.rectangle(w + t / 2, h / 2, t, h + 2 * t),
+        ].map(b => (Body.setStatic(b, true), b));
+        bodies = spans.map((span, i) => {
+          // The ink sits a little inside the letter box.
+          const bw = span.offsetWidth * .86;
+          const bh = span.offsetHeight * .8;
+          const x = Math.min(Math.max(bw / 2, w * (.25 + .5 * ((i * .618) % 1))), w - bw / 2);
+          const y = Math.min(bh / 2 + 8 + i * bh * .95, h - bh / 2);
+          const body = Bodies.rectangle(x, y, bw, bh, {
+            angle: (Math.random() - .5) * .8,
+            friction: .4,
+            restitution: .15,
+            chamfer: { radius: Math.min(bw, bh) * .12 },
+          });
+          // A little spin, so they tumble into a pile instead of a tower.
+          Body.setAngularVelocity(body, (Math.random() - .5) * .1);
+          body.span = span;
+          return body;
+        });
+        Composite.add(engine.world, [...walls, ...bodies]);
+        if (still) for (let i = 0; i < 400; i++) Engine.update(engine, STEP);
+        draw();
+        for (const span of spans) span.style.visibility = "visible";
+      }
+
+      function draw() {
+        for (const b of bodies) {
+          const s = b.span;
+          s.style.transform = `translate(${b.position.x - s.offsetWidth / 2}px, ${b.position.y - s.offsetHeight / 2}px) rotate(${b.angle}rad)`;
+        }
+      }
+
+      // Run while the card is on screen and something is moving or held.
+      let visible = false, frame = 0, last = 0, lag = 0;
+      let grab = null;
+      function tick(now) {
+        frame = 0;
+        lag = Math.min(lag + now - (last || now), 100);
+        last = now;
+        while (lag >= STEP) {
+          Engine.update(engine, STEP);
+          lag -= STEP;
+        }
+        draw();
+        if (visible && (grab || bodies.some(b => !b.isSleeping))) frame = requestAnimationFrame(tick);
+        else last = 0;
+      }
+      function wake() {
+        if (!frame && visible && !still) frame = requestAnimationFrame(tick);
+      }
+
+      new IntersectionObserver(([e]) => {
+        visible = e.isIntersecting;
+        wake();
+      }).observe(card);
+
+      new ResizeObserver(() => {
+        const w = stage.clientWidth, h = stage.clientHeight;
+        if (size && size.w === w && size.h === h) return;
+        size = { w, h };
+        build(w, h);
+        wake();
+      }).observe(stage);
+
+      // Drag: a soft spring from the pointer to the point grabbed.
+      const at = e => {
+        const r = stage.getBoundingClientRect();
+        return { x: (e.clientX - r.left) * stage.clientWidth / r.width, y: (e.clientY - r.top) * stage.clientHeight / r.height };
+      };
+      for (const span of spans) {
+        span.addEventListener("pointerdown", e => {
+          if (grab) return;
+          const body = bodies.find(b => b.span === span);
+          const p = at(e);
+          // The span's box is a bit larger than its body; grab it anyway.
+          const local = Query.point([body], p).length ? p : body.position;
+          Sleeping.set(body, false);
+          const spring = Constraint.create({
+            pointA: p,
+            bodyB: body,
+            pointB: Matter.Vector.rotate(Matter.Vector.sub(local, body.position), -body.angle),
+            stiffness: .2,
+            damping: .1,
+            length: 0,
+          });
+          Composite.add(engine.world, spring);
+          grab = { id: e.pointerId, spring, span };
+          span.setPointerCapture(e.pointerId);
+          span.classList.add("dragging");
+          lag = 0;
+          if (still) frame = frame || requestAnimationFrame(tick);
+          else wake();
+        });
+        span.addEventListener("pointermove", e => {
+          if (grab?.id !== e.pointerId) return;
+          grab.spring.pointA = at(e);
+        });
+        const drop = e => {
+          if (grab?.id !== e.pointerId) return;
+          Composite.remove(engine.world, grab.spring);
+          grab.span.classList.remove("dragging");
+          grab = null;
+          if (still) {
+            for (let i = 0; i < 400; i++) Engine.update(engine, STEP);
+            draw();
+          }
+        };
+        span.addEventListener("pointerup", drop);
+        span.addEventListener("pointercancel", drop);
+      }
+    }
+
+    // Skate clip: plays on its own, and holds still under the pointer. With
+    // reduced motion it stays on its first frame.
+    const skate = document.getElementById("skate");
+    const clip = skate.querySelector("video");
+    const playClip = () => clip.play().catch(() => {});
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      playClip();
+      skate.addEventListener("pointerenter", e => { if (e.pointerType === "mouse") clip.pause(); });
+      skate.addEventListener("pointerleave", e => { if (e.pointerType === "mouse") playClip(); });
     }
 
     // Photos
@@ -1294,11 +1755,14 @@
     mapButton.onclick = () => openModal("map-modal", mapButton);
     const nowButton = document.getElementById("open-now");
     nowButton.onclick = () => openModal("now-modal", nowButton);
+    const linksButton = document.getElementById("open-links");
+    linksButton.onclick = () => openModal("links-modal", linksButton);
     for (const btn of document.querySelectorAll(".close")) btn.onclick = closeModals;
     document.addEventListener("keydown", e => { if (e.key === "Escape") closeModals(); });
 
     loadStays().catch(console.error);
     loadSheet().catch(console.error);
+    loadLinks().catch(console.error);
     loadLand().catch(console.error);
     loadPhoto().catch(console.error);
     loadPick("assets/songs.json", "song", s => ({

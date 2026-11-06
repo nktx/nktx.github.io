@@ -117,14 +117,15 @@
                               h i
                               j j
        Each breakpoint places cards by name in its own template, so a card can
-       move on one device without changing the markup order. */
+       move on one device without changing the markup order. Designed cards
+       take their own names: song (a), movie (b), stay (g), cafe (j). */
     .grid {
       display: grid;
       grid-template-areas:
-        "a stay d d"
+        "song movie d d"
         "c c d d"
         "e f h i"
-        "e g cafe cafe";
+        "e stay cafe cafe";
       grid-auto-columns: var(--cell);
       grid-auto-rows: var(--cell);
       gap: var(--gap);
@@ -135,6 +136,12 @@
     }
     .cafe {
       grid-area: cafe;
+    }
+    .song {
+      grid-area: song;
+    }
+    .movie {
+      grid-area: movie;
     }
     .tile {
       --grow-x: 2px;
@@ -243,7 +250,15 @@
       font-family: "IBM Plex Mono", monospace;
       line-height: 1;
       text-align: left;
+      text-decoration: none;
+      color: inherit;
       cursor: pointer;
+    }
+    /* Link cards wait for their pick to load; until then they have no href
+       and stay inert. */
+    a.stat:not([href]) {
+      cursor: default;
+      pointer-events: none;
     }
     /* backdrop-filter only blurs what's painted behind it, so the face needs
        an opaque ground to blur against. */
@@ -301,6 +316,13 @@
     .stat-title {
       font-weight: 700;
     }
+    /* Song and film names can run long: two lines each at most. */
+    .clamp {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+    }
     /* With a mouse the details wait for hover or keyboard focus; touch
        screens show them all the time. */
     @media (hover: hover) {
@@ -332,6 +354,11 @@
     .cafe .tile-media {
       background-color: #6b2c0d;
       background-image: url("assets/cafe.webp");
+    }
+    /* The cover or poster is set by script; a dark ground shows until then. */
+    .song .tile-media,
+    .movie .tile-media {
+      background-color: #2a2a2a;
     }
 
     /* Tablet: profile above the same four-column grid */
@@ -365,12 +392,12 @@
       .grid {
         --cell: calc((100cqi - var(--gap)) / 2);
         grid-template-areas:
-          "a stay"
+          "song movie"
           "c c"
           "d d"
           "d d"
           "e f"
-          "e g"
+          "e stay"
           "h i"
           "cafe cafe";
       }
@@ -676,6 +703,30 @@
     </header>
 
     <main class="grid">
+      <a class="tile tile-fill stat song" id="song" target="_blank" rel="noopener">
+        <span class="tile-surface">
+          <span class="tile-media"></span>
+          <span class="stat-mask"></span>
+        </span>
+        <span class="tile-edge"><span class="tile-glow"></span></span>
+        <span class="stat-info">
+          <span class="stat-head"><span class="stat-label">Recently Liked</span><span aria-hidden="true">↗</span></span>
+          <strong class="stat-title clamp" data-title></strong>
+          <span class="clamp" data-sub></span>
+        </span>
+      </a>
+      <a class="tile tile-fill stat movie" id="movie" target="_blank" rel="noopener">
+        <span class="tile-surface">
+          <span class="tile-media"></span>
+          <span class="stat-mask"></span>
+        </span>
+        <span class="tile-edge"><span class="tile-glow"></span></span>
+        <span class="stat-info">
+          <span class="stat-head"><span class="stat-label">Recently Viewed</span><span aria-hidden="true">↗</span></span>
+          <strong class="stat-title clamp" data-title></strong>
+          <span class="clamp" data-sub></span>
+        </span>
+      </a>
       <button class="tile stat stay" id="open-stay" type="button" aria-haspopup="dialog">
         <span class="tile-surface">
           <span class="stat-face" aria-hidden="true">
@@ -704,12 +755,10 @@
         </span>
       </button>
       <!-- Empty slots, kept by their slot letter until their cards are designed -->
-      <div class="tile" style="grid-area: a" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
       <div class="tile" style="grid-area: c" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
       <div class="tile" style="grid-area: d" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
       <div class="tile" style="grid-area: e" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
       <div class="tile" style="grid-area: f" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
-      <div class="tile" style="grid-area: g" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
       <div class="tile" style="grid-area: h" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
       <div class="tile" style="grid-area: i" aria-hidden="true"><div class="tile-edge"><div class="tile-glow"></div></div></div>
     </main>
@@ -862,6 +911,24 @@
       if (values.cafes_visited) document.getElementById("cafes").textContent = Number(values.cafes_visited).toLocaleString("en-US");
     }
 
+    // Song and movie picks
+
+    // assets/songs.json and assets/movies.json are written by the update-picks
+    // workflow (scripts/update-*.mjs). Each visit shows one entry at random.
+    async function loadPick(file, id, show) {
+      const res = await fetch(file);
+      if (!res.ok) throw new Error(`${file} ${res.status}`);
+      const list = await res.json();
+      if (!list.length) return;
+      const { url, image, title, sub, label } = show(list[Math.floor(Math.random() * list.length)]);
+      const card = document.getElementById(id);
+      if (/^https:\/\//.test(image)) card.querySelector(".tile-media").style.backgroundImage = `url("${encodeURI(image)}")`;
+      card.querySelector("[data-title]").textContent = title;
+      card.querySelector("[data-sub]").textContent = sub;
+      card.setAttribute("aria-label", label);
+      if (/^https:\/\//.test(url)) card.href = url;
+    }
+
     // assets/asia-ascii.txt holds the land as text: one row per 9-unit cell
     // row from y = -720, starting at x = -1350, spaces for sea. It is Natural
     // Earth's 50m land sampled at cell centers on the same Mercator grid as
@@ -965,6 +1032,14 @@
     loadStays().catch(console.error);
     loadSheet().catch(console.error);
     loadLand().catch(console.error);
+    loadPick("assets/songs.json", "song", s => ({
+      url: s.url, image: s.cover, title: s.title, sub: s.artist,
+      label: `${s.title} by ${s.artist}, on Spotify`,
+    })).catch(console.error);
+    loadPick("assets/movies.json", "movie", m => ({
+      url: m.url, image: m.poster, title: `${m.rating}*`, sub: m.title,
+      label: `${m.title}, rated ${m.rating}/10, on IMDb`,
+    })).catch(console.error);
   </script>
 </body>
 </html>

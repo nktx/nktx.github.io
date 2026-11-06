@@ -1,0 +1,61 @@
+# Refreshes the data behind the homepage's song and movie cards:
+# assets/songs.json from the Spotify playlist every day, and
+# assets/movies.json whenever a new IMDb export lands in
+# data/imdb-ratings.csv. Commits only when a file changed.
+name: Update picks
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - data/imdb-ratings.csv
+      - scripts/update-*.mjs
+      - .github/workflows/update-picks.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-picks
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Songs
+        run: node scripts/update-songs.mjs
+
+      - name: Movies
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: |
+          if [ ! -f data/imdb-ratings.csv ]; then
+            echo "No data/imdb-ratings.csv yet, skipped"
+          elif [ -z "$TMDB_API_KEY" ]; then
+            echo "::warning::TMDB_API_KEY secret is not set, movies skipped"
+          else
+            node scripts/update-movies.mjs
+          fi
+
+      - name: Commit
+        run: |
+          git add assets/songs.json assets/movies.json
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update song and movie picks"
+          git pull --rebase
+          git push

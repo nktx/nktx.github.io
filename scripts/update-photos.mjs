@@ -4,10 +4,11 @@
 // Photos are uploaded to assets/photos/ named after where they were taken,
 // like "Chiang Mai, Thailand.jpg"; a trailing number tells apart several
 // from one place ("Tokyo, Japan 2.jpg"). Each one that isn't already a small
-// webp is turned upright, shrunk to 1000px on its long edge and saved as
-// webp, which also drops its metadata (GPS included); the original is then
-// deleted. The list is rebuilt from the file names, so it never needs
-// editing by hand. Runs in the update-photos workflow and needs sharp.
+// webp is turned upright, shrunk to 1200px on its short edge (sharp enough
+// for the 2×2 card on a 2× or 3× screen, since the card crops the photo to a
+// square) and saved as webp, which also drops its metadata (GPS included);
+// the original is then deleted. The list is rebuilt from the file names, so
+// it never needs editing by hand. Runs in the update-photos workflow and needs sharp.
 
 import { readdir, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -16,7 +17,7 @@ import sharp from "sharp";
 
 const DIR = new URL("../assets/photos/", import.meta.url);
 const OUT = new URL("../assets/photos.json", import.meta.url);
-const EDGE = 1000;
+const SHORT = 1200;
 const IMAGE = /\.(jpe?g|png|webp|avif|tiff?|gif)$/i;
 
 const stem = name => name.replace(/\.[^.]+$/, "");
@@ -35,7 +36,7 @@ const done = new Set();
 for (const file of files) {
   const input = sharp(fileURLToPath(at(file)), { failOn: "none" });
   const { width = 0, height = 0, orientation = 1 } = await input.metadata();
-  const small = Math.max(width, height) <= EDGE && orientation === 1;
+  const small = Math.min(width, height) <= SHORT && orientation === 1;
   if (/\.webp$/i.test(file) && small) {
     done.add(file);
     continue;
@@ -43,7 +44,7 @@ for (const file of files) {
   const name = /\.webp$/i.test(file) ? file : free(stem(file), done);
   const data = await input
     .rotate()
-    .resize({ width: EDGE, height: EDGE, fit: "inside", withoutEnlargement: true })
+    .resize({ width: SHORT, height: SHORT, fit: "outside", withoutEnlargement: true })
     .webp({ quality: 80 })
     .toBuffer();
   if (name !== file) await rm(at(file));

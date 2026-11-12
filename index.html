@@ -898,6 +898,10 @@
       background: var(--hatch);
       text-decoration: line-through;
     }
+    .day.today {
+      color: var(--accent);
+      font-weight: 600;
+    }
     .day.today::after {
       content: "";
       position: absolute;
@@ -957,13 +961,13 @@
     }
     .now-body p {
       margin: 0;
-      font-size: 1.125rem;
-      line-height: 30px;
+      font-size: 0.875rem;
+      line-height: 24px;
       color: var(--ink-soft);
     }
     .now-body .now-lead {
-      margin-bottom: 36px;
-      font-size: 1.75rem;
+      margin-bottom: 32px;
+      font-size: 1.5rem;
       font-weight: 600;
       letter-spacing: -0.02em;
       line-height: 1.4;
@@ -1265,6 +1269,8 @@
         <h2 class="now-mark" id="now-title" aria-label="Now"><span class="now-slash">/ </span>now<span class="now-caret"></span></h2>
         <div class="now-body">
           <p class="now-lead" lang="zh-Hant" data-now="zh"></p>
+          <p lang="nan-Hant-TW" data-now="tw"></p>
+          <p lang="nan-Latn-TW" data-now="tl"></p>
           <p lang="en" data-now="en"></p>
           <p lang="ja" data-now="ja"></p>
         </div>
@@ -1431,7 +1437,8 @@
     }
 
     // Rows used: cafes_visited; flight_from, flight_to (airport codes);
-    // now_zh, now_en, now_ja (one line each) and now_updated (YYYY-MM-DD);
+    // now_zh, now_tw (Taiwanese in Han characters), now_tl (Taiwanese in
+    // Tâi-lô), now_en, now_ja (one line each) and now_updated (YYYY-MM-DD);
     // sprint_no (a number) and sprint_name.
     async function loadSheet() {
       const values = {};

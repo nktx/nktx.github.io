@@ -1,39 +1,9 @@
 [
   {
-    "title": "SOS",
-    "artist": "Balming Tiger",
-    "url": "https://open.spotify.com/track/5gIOktFwX7sCpcllYCPZNO",
-    "cover": "https://i.scdn.co/image/ab67616d0000b273bb3e29f4395647c77436cd6c"
-  },
-  {
-    "title": "Wild Window (feat. Tricky Trio)",
-    "artist": "Mees Dierdorp",
-    "url": "https://open.spotify.com/track/5iIGlnl7xSxrShew5LHzwi",
-    "cover": "https://i.scdn.co/image/ab67616d0000b27325a65aea326c8f1b43e6882c"
-  },
-  {
     "title": "Sun",
     "artist": "Derik Fein",
     "url": "https://open.spotify.com/track/7Hybzi2nMsBsg2Fs2aKUh7",
     "cover": "https://i.scdn.co/image/ab67616d0000b273d1bcd5f353625ad1a24006ab"
-  },
-  {
-    "title": "Selva Selva",
-    "artist": "Parra for Cuva",
-    "url": "https://open.spotify.com/track/3pPVYrVbSLCdS8IY2OeNFR",
-    "cover": "https://i.scdn.co/image/ab67616d0000b2730c6ed07c34841cc2fd2673fe"
-  },
-  {
-    "title": "Come Alive",
-    "artist": "Pendulum",
-    "url": "https://open.spotify.com/track/032EMy8DqOqgKkF5wJm21w",
-    "cover": "https://i.scdn.co/image/ab67616d0000b2731a1f9194f4f906aaafbcb8db"
-  },
-  {
-    "title": "Choices",
-    "artist": "Stavroz",
-    "url": "https://open.spotify.com/track/6fuThEZVGi5uTaGJo5zgVD",
-    "cover": "https://i.scdn.co/image/ab67616d0000b2738f408ec757f06e667a3a285a"
   },
   {
     "title": "Believe",
@@ -46,5 +16,29 @@
     "artist": "The Technicolors",
     "url": "https://open.spotify.com/track/0Sjz8pTu8vcVvGP5rtyh3Q",
     "cover": "https://i.scdn.co/image/ab67616d0000b2735fd7c284c0b719ad07b8eac2"
+  },
+  {
+    "title": "八寶公主 Princess Bubble",
+    "artist": "A_Root同根生",
+    "url": "https://open.spotify.com/track/0MyZGpsTYtgWMwwuX2fhpB",
+    "cover": "https://i.scdn.co/image/ab67616d0000b273f9ca2827b6f7d75eeb625f4b"
+  },
+  {
+    "title": "迷恋",
+    "artist": "梅卡德尔",
+    "url": "https://open.spotify.com/track/29et0ax4oK1n3obIAyPG0I",
+    "cover": "https://i.scdn.co/image/ab67616d0000b273c6d873a7875bd0b3c283a73c"
+  },
+  {
+    "title": "心悸大戰",
+    "artist": "午夜乒乓",
+    "url": "https://open.spotify.com/track/06S1JUNqp1nsQWEPJln53Q",
+    "cover": "https://i.scdn.co/image/ab67616d0000b273d076cf8401875245b4b92cf8"
+  },
+  {
+    "title": "Voodoo?",
+    "artist": "L'Impératrice",
+    "url": "https://open.spotify.com/track/3pr0y5h4MkBngy6gyozLDV",
+    "cover": "https://i.scdn.co/image/ab67616d0000b273389ffd99d51037a6f0a256f5"
   }
 ]
